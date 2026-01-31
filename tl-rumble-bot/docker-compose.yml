@@ -1,0 +1,21 @@
+# TL Rumble Bot - Déploiement NAS / serveur
+# Usage : placer .env à côté de ce fichier, puis :
+#   docker compose up -d
+
+services:
+  tl-rumble-bot:
+    build: .
+    container_name: tl-rumble-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Base SQLite dans un volume persistant
+      DATABASE_PATH: /data/tl-rumble.sqlite
+    volumes:
+      # Données (DB, etc.) : adapter le chemin gauche à votre NAS
+      - ./data:/data
+    # Optionnel : limiter les ressources sur un NAS
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 256M
