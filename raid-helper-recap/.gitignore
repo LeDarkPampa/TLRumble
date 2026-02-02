@@ -1,0 +1,13 @@
+# Config locale (ne pas commiter)
+.env
+
+# Node
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
