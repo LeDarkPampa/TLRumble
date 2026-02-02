@@ -65,7 +65,7 @@ function buildGuildDescription(guild) {
 export default {
   data: new SlashCommandBuilder()
     .setName('servers')
-    .setDescription('Lister les serveurs où le bot est présent et leurs salons (Moderator)'),
+    .setDescription('Liste les serveurs utilisant le bot.'),
   async execute(interaction) {
     const isMainGuild = !config.mainGuildId || interaction.guildId === config.mainGuildId;
     if (!isMainGuild) {

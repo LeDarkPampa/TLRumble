@@ -1,7 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { DateTime } from 'luxon';
 import { config } from '../config.js';
-import { createSlot, listSlots, getSlotById, getRegistrationsForSlot, getRegistrationCountForSlot } from '../services/slotService.js';
-import { postNewScheduleMessage, postToFeedChannels } from '../services/scheduleMessageService.js';
+import { createSlot, listSlots, listOpenSlots, getSlotById, getRegistrationsForSlot, getRegistrationCountForSlot, deleteSlot, closeSlot } from '../services/slotService.js';
+import { postNewScheduleMessage, postToFeedChannels, deleteScheduleMessage, updateScheduleMessage } from '../services/scheduleMessageService.js';
+import { getScheduleChannelId } from '../services/scheduleChannelService.js';
 
 function formatSlotDatetime(isoUtc) {
   try {
@@ -32,6 +34,18 @@ export default {
         .setName('info')
         .setDescription('Afficher le détail d\'un créneau')
         .addIntegerOption((o) => o.setName('id').setDescription('ID du créneau').setRequired(true))
+    )
+    .addSubcommand((sc) =>
+      sc
+        .setName('close')
+        .setDescription('Fermer un créneau aux inscriptions (staff)')
+        .addIntegerOption((o) => o.setName('id').setDescription('ID du créneau à fermer').setRequired(true))
+    )
+    .addSubcommand((sc) =>
+      sc
+        .setName('delete')
+        .setDescription('Supprimer un créneau (staff)')
+        .addIntegerOption((o) => o.setName('id').setDescription('ID du créneau à supprimer').setRequired(true))
     ),
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
@@ -69,16 +83,22 @@ export default {
         });
       }
 
-      const [, y, m, d] = matchDate;
-      const [, h, min] = matchTime;
-      // L'utilisateur saisit l'heure dans le fuseau du serveur (ex. Europe/Paris), pas en UTC.
-      const hour = parseInt(h, 10);
-      const minute = parseInt(min, 10);
-      const tempUtc = new Date(Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10), hour, minute));
-      const displayedHour = parseInt(tempUtc.toLocaleString('en-US', { timeZone: config.serverTimezone, hour: 'numeric', hour12: false }), 10);
-      const displayedMinute = parseInt(tempUtc.toLocaleString('en-US', { timeZone: config.serverTimezone, minute: 'numeric' }), 10);
-      const diffMs = ((hour - displayedHour) * 60 + (minute - displayedMinute)) * 60 * 1000;
-      const datetimeUtc = new Date(tempUtc.getTime() + diffMs).toISOString();
+      const year = parseInt(matchDate[1], 10);
+      const month = parseInt(matchDate[2], 10);
+      const day = parseInt(matchDate[3], 10);
+      const hour = parseInt(matchTime[1], 10);
+      const minute = parseInt(matchTime[2], 10);
+      const dt = DateTime.fromObject(
+        { year, month, day, hour, minute, second: 0, millisecond: 0 },
+        { zone: config.serverTimezone }
+      );
+      if (!dt.isValid) {
+        return interaction.reply({
+          content: `Date/heure invalide pour la timezone ${config.serverTimezone}. Vérifie SERVER_TIMEZONE dans .env (ex. Europe/Paris).`,
+          ephemeral: true,
+        });
+      }
+      const datetimeUtc = dt.toUTC().toISO();
 
       const slot = createSlot(datetimeUtc, maxGroups);
       if (!slot) {
@@ -88,21 +108,31 @@ export default {
         });
       }
       const localStr = formatSlotDatetime(slot.datetime_utc);
-      if (config.wargameScheduleChannelId) {
-        try {
-          await postNewScheduleMessage(interaction.client, slot);
-        } catch (err) {
-          console.error('Erreur envoi message schedule:', err);
-        }
+      let scheduleOk = false;
+      let scheduleError = null;
+      if (getScheduleChannelId()) {
+        const result = await postNewScheduleMessage(interaction.client, slot).catch((err) => ({ ok: false, error: err?.message }));
+        scheduleOk = result?.ok === true;
+        scheduleError = result?.error || null;
       }
+      let feedResult = { sent: 0, failed: 0 };
       try {
-        await postToFeedChannels(interaction.client, slot);
+        feedResult = await postToFeedChannels(interaction.client, slot) || feedResult;
       } catch (err) {
         console.error('Erreur envoi feed autres guildes:', err);
       }
+
+      let extra = '';
+      if (scheduleOk) {
+        extra += ' Un message a été posté dans le canal schedule.';
+      } else if (scheduleError) {
+        extra += ` ⚠️ Canal schedule : ${scheduleError}`;
+      }
+      if (feedResult.sent > 0) extra += ` Annonce envoyée sur ${feedResult.sent} serveur(s) fils.`;
+      if (feedResult.failed > 0) extra += ` (${feedResult.failed} envoi(s) feed échoué(s) — vérifier /tl-feed-setup et les permissions du bot).`;
+
       return interaction.reply({
-        content: `Créneau créé : **${localStr}** (ID: ${slot.id}, max ${slot.max_groups} groupes).` +
-          (config.wargameScheduleChannelId ? ' Un message a été posté dans le canal schedule.' : ''),
+        content: `Créneau créé : **${localStr}** (ID: ${slot.id}, max ${slot.max_groups} groupes).${extra || ''}`,
         ephemeral: false,
       });
     }
@@ -140,6 +170,85 @@ export default {
         replyContent += '\nAucune inscription pour le moment.';
       }
       return interaction.reply({ content: replyContent, ephemeral: false });
+    }
+
+    if (sub === 'close') {
+      if (!isMainGuild) {
+        return interaction.reply({
+          content: "Cette commande n'est disponible que sur le serveur **TL Rumble**.",
+          ephemeral: true,
+        });
+      }
+      const moderatorRoleId = config.moderatorRoleId;
+      const member = interaction.member;
+      const hasRole = moderatorRoleId && member.roles.cache.has(moderatorRoleId);
+      const isAdmin = member.permissions?.has?.('Administrator');
+      if (!hasRole && !isAdmin) {
+        return interaction.reply({
+          content: "Tu n'as pas la permission de fermer des créneaux (rôle Moderator requis).",
+          ephemeral: true,
+        });
+      }
+      const slotId = interaction.options.getInteger('id');
+      const slot = getSlotById(slotId);
+      if (!slot) {
+        return interaction.reply({ content: 'Créneau introuvable.', ephemeral: true });
+      }
+      if (slot.status === 'CLOSED') {
+        return interaction.reply({
+          content: 'Ce créneau est déjà fermé aux inscriptions.',
+          ephemeral: true,
+        });
+      }
+      closeSlot(slotId);
+      try {
+        await updateScheduleMessage(interaction.client, slotId);
+      } catch (err) {
+        console.error('Erreur mise à jour message schedule:', err);
+      }
+      const localStr = formatSlotDatetime(slot.datetime_utc);
+      return interaction.reply({
+        content: `Créneau **${localStr}** (ID: ${slotId}) fermé aux inscriptions. Le bouton « S'inscrire » est désactivé.`,
+        ephemeral: false,
+      });
+    }
+
+    if (sub === 'delete') {
+      if (!isMainGuild) {
+        return interaction.reply({
+          content: "Cette commande n'est disponible que sur le serveur **TL Rumble**.",
+          ephemeral: true,
+        });
+      }
+      const moderatorRoleId = config.moderatorRoleId;
+      const member = interaction.member;
+      const hasRole = moderatorRoleId && member.roles.cache.has(moderatorRoleId);
+      const isAdmin = member.permissions?.has?.('Administrator');
+      if (!hasRole && !isAdmin) {
+        return interaction.reply({
+          content: "Tu n'as pas la permission de supprimer des créneaux (rôle Moderator requis).",
+          ephemeral: true,
+        });
+      }
+      const slotId = interaction.options.getInteger('id');
+      const slot = getSlotById(slotId);
+      if (!slot) {
+        return interaction.reply({ content: 'Créneau introuvable.', ephemeral: true });
+      }
+      try {
+        await deleteScheduleMessage(interaction.client, slot);
+      } catch (err) {
+        console.error('Erreur suppression message schedule:', err);
+      }
+      const deleted = deleteSlot(slotId);
+      if (!deleted) {
+        return interaction.reply({ content: 'Créneau introuvable.', ephemeral: true });
+      }
+      const localStr = formatSlotDatetime(slot.datetime_utc);
+      return interaction.reply({
+        content: `Créneau **${localStr}** (ID: ${slotId}) supprimé. Les inscriptions associées ont été supprimées.`,
+        ephemeral: false,
+      });
     }
   },
 };

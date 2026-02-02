@@ -9,12 +9,14 @@ export function getFeedChannels() {
 }
 
 /**
- * Guildes feed à utiliser pour la diffusion (exclut le serveur principal).
+ * Guildes feed à utiliser pour la diffusion (exclut le serveur principal si MAIN_GUILD_ID est défini).
+ * Si mainGuildId n'est pas défini, retourne tous les canaux feed configurés.
  */
 export function getFeedChannelsExcluding(mainGuildId) {
-  if (!mainGuildId) return [];
   const db = getDb();
-  return db.prepare('SELECT guild_id, channel_id FROM guild_feed_channels WHERE guild_id != ?').all(mainGuildId);
+  const all = db.prepare('SELECT guild_id, channel_id FROM guild_feed_channels').all();
+  if (!mainGuildId) return all;
+  return all.filter((row) => String(row.guild_id) !== String(mainGuildId));
 }
 
 /**

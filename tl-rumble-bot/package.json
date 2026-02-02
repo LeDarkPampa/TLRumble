@@ -11,13 +11,19 @@
     "lint": "eslint src/**/*.js",
     "format": "prettier --write \"src/**/*.js\""
   },
-  "keywords": ["discord", "bot", "tl-rumble", "wargame"],
+  "keywords": [
+    "discord",
+    "bot",
+    "tl-rumble",
+    "wargame"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.14.1",
+    "better-sqlite3": "^11.6.0",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.3.1",
-    "better-sqlite3": "^11.6.0"
+    "luxon": "^3.5.0"
   },
   "devDependencies": {
     "eslint": "^8.54.0",

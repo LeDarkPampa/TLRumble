@@ -9,13 +9,16 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      # Base SQLite dans un volume persistant
-      DATABASE_PATH: /data/tl-rumble.sqlite
+      # DATABASE_PATH est forcé par l'entrypoint à /app/data (volume app-data) pour éviter erreurs sur NAS
+      - NODE_ENV=production
     volumes:
-      # Données (DB, etc.) : adapter le chemin gauche à votre NAS
-      - ./data:/data
+      # Base SQLite : volume Docker (évite "unable to open database file" sur NAS)
+      - app-data:/app/data
     # Optionnel : limiter les ressources sur un NAS
     # deploy:
     #   resources:
     #     limits:
     #       memory: 256M
+
+volumes:
+  app-data:

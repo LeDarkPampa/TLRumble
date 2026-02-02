@@ -42,17 +42,19 @@ export default {
           return interaction.reply({ content: 'Ce créneau est fermé aux inscriptions.', ephemeral: true }).catch(() => {});
         }
         const isMainGuild = !config.mainGuildId || interaction.guildId === config.mainGuildId;
-        if (!isMainGuild) {
-          return interaction.reply({
-            content: "Les inscriptions se font sur le serveur **TL Rumble**. Rejoins ce serveur pour t'inscrire.",
-            ephemeral: true,
-          }).catch(() => {});
+        let hasRole = config.wargamePlayerRoleId && interaction.member?.roles?.cache?.has(config.wargamePlayerRoleId);
+        let isAdmin = interaction.member?.permissions?.has?.('Administrator');
+        if (!isMainGuild && config.mainGuildId) {
+          const mainGuild = await interaction.client.guilds.fetch(config.mainGuildId).catch(() => null);
+          if (mainGuild) {
+            const mainMember = await mainGuild.members.fetch(interaction.user.id).catch(() => null);
+            hasRole = mainMember && config.wargamePlayerRoleId && mainMember.roles.cache.has(config.wargamePlayerRoleId);
+            isAdmin = mainMember?.permissions?.has?.('Administrator');
+          }
         }
-        const hasRole = config.wargamePlayerRoleId && interaction.member?.roles?.cache?.has(config.wargamePlayerRoleId);
-        const isAdmin = interaction.member?.permissions?.has?.('Administrator');
         if (!hasRole && !isAdmin) {
           return interaction.reply({
-            content: "Tu dois avoir le rôle **Wargame Player** pour t'inscrire.",
+            content: "Tu dois avoir le rôle **Wargame Player** sur le serveur **TL Rumble** pour t'inscrire.",
             ephemeral: true,
           }).catch(() => {});
         }
@@ -102,16 +104,18 @@ export default {
             ephemeral: true,
           }).catch(() => {});
         }
-        const guild = interaction.guild;
-        if (!guild) {
-          return interaction.reply({ content: 'Cette action doit être utilisée sur un serveur.', ephemeral: true }).catch(() => {});
+        const guildForMembers = config.mainGuildId
+          ? await interaction.client.guilds.fetch(config.mainGuildId).catch(() => null)
+          : interaction.guild;
+        if (!guildForMembers) {
+          return interaction.reply({ content: 'Impossible de vérifier les membres (serveur principal introuvable).', ephemeral: true }).catch(() => {});
         }
         for (const id of playerIds) {
           try {
-            await guild.members.fetch(id);
+            await guildForMembers.members.fetch(id);
           } catch (_) {
             return interaction.reply({
-              content: `<@${id}> n'est pas membre de ce serveur. Tous les joueurs doivent être sur le serveur TL Rumble.`,
+              content: `<@${id}> n'est pas membre du serveur **TL Rumble**. Tous les joueurs doivent être sur le serveur TL Rumble.`,
               ephemeral: true,
             }).catch(() => {});
           }
@@ -137,10 +141,33 @@ export default {
       }
     }
 
+    if (interaction.isAutocomplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (command?.autocomplete) {
+        try {
+          await command.autocomplete(interaction);
+        } catch (err) {
+          console.error(`Autocomplete ${interaction.commandName}:`, err);
+        }
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const command = interaction.client.commands.get(interaction.commandName);
     if (!command) return;
+
+    // /servers et /listen-messages : uniquement sur le serveur principal (MAIN_GUILD_ID)
+    const mainGuildOnlyCommands = ['servers', 'listen-messages'];
+    if (config.mainGuildId && mainGuildOnlyCommands.includes(interaction.commandName)) {
+      if (interaction.guildId !== config.mainGuildId) {
+        return interaction.reply({
+          content: "Cette commande n'est disponible que sur le serveur **TL Rumble**.",
+          ephemeral: true,
+        }).catch(() => {});
+      }
+    }
 
     try {
       await command.execute(interaction);

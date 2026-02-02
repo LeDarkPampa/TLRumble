@@ -12,7 +12,7 @@ export default {
     .addChannelOption((o) =>
       o
         .setName('canal')
-        .setDescription('Canal où le bot affichera les nouveaux wargames')
+        .setDescription('Canal où le bot affichera les nouveaux wargames (choisir à nouveau le même canal pour vérifier la config)')
         .setRequired(true)
         .addChannelTypes(ChannelType.GuildText)
     ),
@@ -38,10 +38,13 @@ export default {
     const wasUpdate = !!previous && previous !== channel.id;
     setFeedChannel(interaction.guildId, channel.id);
 
+    const hint = `\n\nLes prochains créneaux créés sur **TL Rumble** avec \`/slot create\` seront annoncés ici. Pour vérifier que c’est bien pris en compte, refais \`/tl-feed-setup\` avec le même canal.`;
+
     await interaction.reply({
-      content: wasUpdate
+      content: (wasUpdate
         ? `Le canal des annonces wargame a été mis à jour : ${channel}. Les nouveaux créneaux planifiés sur **TL Rumble** y seront affichés.`
-        : `Le canal ${channel} a été configuré pour recevoir les annonces des nouveaux wargames planifiés sur **TL Rumble**. Les inscriptions restent sur le serveur TL Rumble.`,
+        : `Le canal ${channel} a été configuré pour recevoir les annonces des nouveaux wargames planifiés sur **TL Rumble**. Les inscriptions restent sur le serveur TL Rumble.`
+      ) + hint,
       ephemeral: false,
     });
   },

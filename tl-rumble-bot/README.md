@@ -57,10 +57,14 @@ npm start
 | Commande | Description | Qui / où |
 |----------|-------------|----------|
 | `/ping` | Vérifie que le bot répond | Tous |
-| `/slot create` | Crée un créneau (date, heure, optionnel max groupes) | Moderator, **serveur principal uniquement** si `MAIN_GUILD_ID` est défini |
+| `/slot create` | Crée un créneau (date/heure dans la timezone serveur `SERVER_TIMEZONE`, optionnel max groupes) | Moderator, **serveur principal uniquement** si `MAIN_GUILD_ID` est défini |
 | `/slot list` | Liste tous les créneaux (date/heure, statut, nb groupes) | Tous (tous les serveurs) |
-| `/signup` | Inscrit un groupe de 6 joueurs sur un créneau (ID du slot + 6 mentions) | Wargame Player, **serveur principal uniquement** si `MAIN_GUILD_ID` est défini |
-| `/tl-feed-setup` | Configure le canal où afficher les nouveaux wargames planifiés (pour ce serveur) | Admin / Gérer le serveur, **serveurs autres que TL Rumble** si `MAIN_GUILD_ID` est défini |
+| `/slot info id:<id>` | Affiche le détail d'un créneau (inscrits, etc.) | Tous |
+| `/slot close id:<id>` | Ferme un créneau aux inscriptions (bouton « S'inscrire » désactivé) | Moderator, **serveur principal uniquement** |
+| `/slot delete id:<id>` | Supprime un créneau et ses inscriptions | Moderator, **serveur principal uniquement** |
+| `/signup` | Inscrit un groupe de 6 joueurs sur un créneau (choix du créneau dans la liste ou ID + 6 mentions) | Wargame Player, **serveur principal uniquement** si `MAIN_GUILD_ID` est défini |
+| `/tl-feed-setup` | Configure le canal des annonces des nouveaux créneaux (pour ce serveur) | Gérer le serveur, **serveurs autres que TL Rumble** si `MAIN_GUILD_ID` est défini |
+| `/schedule-setup` | Principal : canal des créneaux + inscription. Autres serveurs : canal des annonces | Principal : Moderator ; autres : Gérer le serveur |
 | `/listen-messages` | Activer / désactiver l’enregistrement des messages écrits de ce serveur (historique en base) | **Serveur principal uniquement** — Admin / Gérer le serveur ; Moderator pour enable-for-server/disable-for-server |
 | `/servers` | Lister les serveurs où le bot est présent et leurs salons (dont vocaux + qui est connecté) | Moderator, **serveur principal uniquement** |
 
@@ -117,7 +121,7 @@ Les personnes qui ont déjà invité le bot gardent les permissions actuelles du
 ## Comportement
 
 - **Créneaux** : stockés en UTC ; affichés dans la timezone configurée (`SERVER_TIMEZONE`, défaut Europe/Paris).
-- **Création de slot** : date et heure sont interprétées en **UTC** (ex. `2025-01-20` + `20:00` = 20h00 UTC). À adapter plus tard si tu veux saisir en heure locale.
+- **Création de slot** : date et heure sont interprétées dans la **timezone du serveur** (`SERVER_TIMEZONE`, défaut Europe/Paris), puis converties en UTC pour le stockage (ex. `2025-01-20` + `20:00` = 20h00 heure locale).
 - **Inscription** : la personne qui fait `/signup` doit être **l’un des 6 joueurs**. Le groupe est nommé automatiquement : `Groupe [ton display name]`.
 - **Limite** : 16 groupes par créneau par défaut (modifiable via `max_groups` à la création).
 - **Canal schedule** : si `WARGAME_SCHEDULE_CHANNEL_ID` est défini dans `.env`, chaque création de slot envoie un message (embed + bouton « S'inscrire ») dans ce canal et crée un thread sous le message. Le message est mis à jour à chaque inscription. Un rappel est envoyé **10 minutes avant** le wargame (dans le thread ou le canal).
@@ -142,11 +146,19 @@ src/
 ├── deploy-commands.js
 ├── commands/
 │   ├── ping.js
-│   ├── slot.js      # subcommands: create, list
-│   └── signup.js
+│   ├── slot.js           # create, list, info, delete
+│   ├── signup.js
+│   ├── tl-feed-setup.js  # canal des annonces (serveurs autres que principal)
+│   ├── schedule-setup.js # canal schedule (principal) ou feed (autres serveurs)
+│   ├── listen-messages.js
+│   └── servers.js
 ├── services/
 │   ├── slotService.js
-│   └── signupService.js
+│   ├── signupService.js
+│   ├── feedService.js
+│   ├── scheduleChannelService.js
+│   ├── scheduleMessageService.js
+│   └── listeningService.js
 ├── db/
 │   ├── db.js
 │   └── schema.sql
@@ -155,7 +167,8 @@ src/
 │   └── eventHandler.js
 └── events/
     ├── ready.js
-    └── interactionCreate.js
+    ├── interactionCreate.js
+    └── messageCreate.js
 ```
 
 ## Base de données

@@ -6,11 +6,11 @@ Backlog des tâches, améliorations et évolutions prévues. À mettre à jour a
 
 ## V2 – Fonctionnalités prévues (hors V1)
 
-- [ ] **/slot close** – Fermer un créneau aux inscriptions (passer status à CLOSED).
-- [ ] **/generate-teams** – Génération des équipes (12v12, 18v18, etc.) à partir des inscriptions d’un slot.
-- [ ] **Équilibrage automatique** – Logique d’équilibrage des équipes (à définir).
-- [ ] **Publication des équipes** – Envoi automatique des équipes dans un canal dédié.
-- [ ] **Notifications / pings** – Rappels ou notifications (ex. avant le wargame).
+- [x] **/slot close** – Fermer un créneau aux inscriptions (passer status à CLOSED). (Implémenté : sous-commande `close`, mise à jour du message schedule.)
+- [ ] **/generate-teams** – Génération des équipes (optionnel : actuellement générées et postées au rappel 10 min via `teamService.postTeamsForSlot`) ; commande explicite pour régénérer/afficher d’un slot.
+- [ ] **Équilibrage automatique** – Logique d’équilibrage des équipes (actuellement : 1ère moitié = Équipe 1, 2ᵉ moitié = Équipe 2).
+- [x] **Publication des équipes** – Envoi automatique des équipes dans le thread du slot (ou canal schedule) au moment du rappel 10 min. (Implémenté dans `teamService.js`.)
+- [x] **Notifications / pings** – Rappel 10 min avant le wargame (dans le thread ou canal schedule). (Implémenté dans `ready.js`.)
 - [ ] **MMR / historique** – Suivi MMR ou historique des joueurs (optionnel).
 
 ---
@@ -23,8 +23,8 @@ Backlog des tâches, améliorations et évolutions prévues. À mettre à jour a
 - [x] **Thread sous le message** – Un thread est créé sous chaque message de wargame.
 - [x] **Rappel 10 min avant** – Le bot envoie un rappel dans le thread (ou le canal) 10 minutes avant l'heure du wargame.
 - [x] **Bouton « Voir les inscrits »** – Sur le message du wargame, un 2e bouton qui affiche en éphemeral la liste des groupes inscrits.
-- [ ] **Saisie date/heure en timezone serveur** – Interpréter date + heure de `/slot create` dans `SERVER_TIMEZONE` puis convertir en UTC pour le stockage (au lieu d’interpréter en UTC).
-- [ ] **Choix du slot dans /signup** – Proposer une liste de slots OPEN (menu de choix) au lieu de saisir uniquement l’ID (limitation Discord : choix statiques au déploiement ; possible avec commande dynamique ou message avec boutons).
+- [x] **Saisie date/heure en timezone serveur** – Interpréter date + heure de `/slot create` dans `SERVER_TIMEZONE` puis convertir en UTC pour le stockage (au lieu d’interpréter en UTC).
+- [x] **Choix du slot dans /signup** – Proposer une liste de slots OPEN (menu de choix) au lieu de saisir uniquement l’ID (implémenté : autocomplete sur l'option slot).
 - [x] **Commande /slot info \<id>** – Afficher le détail d’un créneau (date, heure, statut, liste des groupes inscrits).
 - [ ] **Export ou backup** – Script ou commande staff pour exporter les inscriptions (CSV/JSON) ou sauvegarder la DB.
 - [ ] **Logs** – Logger les créations de slots et inscriptions (fichier ou canal Discord) pour traçabilité.
@@ -38,7 +38,7 @@ Backlog des tâches, améliorations et évolutions prévues. À mettre à jour a
 - [ ] **Migrations DB** – Si le schéma évolue (PostgreSQL V2+), prévoir un système de migrations au lieu de réappliquer `schema.sql`.
 - [x] **Docker** – Dockerfile et docker-compose pour déploiement sur NAS.
 - [ ] **Health check** – Endpoint ou commande dédiée pour vérifier DB + Discord (utile en prod).
-- [ ] **Gestion propre de la sortie** – Fermer la connexion SQLite (`closeDb()`) au `SIGINT`/`SIGTERM`.
+- [x] **Gestion propre de la sortie** – Fermer la connexion SQLite (`closeDb()`) au `SIGINT`/`SIGTERM`. (Implémenté dans `src/index.js`.)
 
 ---
 

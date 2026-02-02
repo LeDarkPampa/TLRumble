@@ -1,18 +1,28 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { config } from '../config.js';
-import { getSlotById } from '../services/slotService.js';
+import { getSlotById, listOpenSlots } from '../services/slotService.js';
 import {
   validateSignup,
   createRegistration,
 } from '../services/signupService.js';
 import { updateScheduleMessage } from '../services/scheduleMessageService.js';
 
+function formatSlotChoiceLabel(isoUtc) {
+  try {
+    const d = new Date(isoUtc);
+    const localStr = d.toLocaleString('fr-FR', { timeZone: config.serverTimezone, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return localStr;
+  } catch {
+    return isoUtc;
+  }
+}
+
 export default {
   data: new SlashCommandBuilder()
     .setName('signup')
     .setDescription("S'inscrire à un créneau wargame avec un groupe de 6 joueurs")
     .addIntegerOption((o) =>
-      o.setName('slot').setDescription("ID du créneau (voir /slot list)").setRequired(true)
+      o.setName('slot').setDescription('Créneau (choisir dans la liste ou voir /slot list)').setRequired(true).setAutocomplete(true)
     )
     .addUserOption((o) =>
       o.setName('player1').setDescription('Joueur 1').setRequired(true)
@@ -125,5 +135,22 @@ export default {
       content: `**${groupDisplayName}** est inscrit pour le créneau **${slotInfo}** (ID: ${slotId}).`,
       ephemeral: false,
     });
+  },
+
+  async autocomplete(interaction) {
+    const focused = interaction.options.getFocused(true);
+    if (focused.name !== 'slot') return;
+    const openSlots = listOpenSlots();
+    const value = focused.value ? String(focused.value).trim() : '';
+    const choices = openSlots
+      .slice(0, 25)
+      .map((s) => ({
+        name: `ID: ${s.id} – ${formatSlotChoiceLabel(s.datetime_utc)} (${s.registration_count}/${s.max_groups})`.slice(0, 100),
+        value: s.id,
+      }));
+    const filtered = value
+      ? choices.filter((c) => String(c.value).includes(value) || c.name.toLowerCase().includes(value.toLowerCase()))
+      : choices;
+    await interaction.respond(filtered.slice(0, 25)).catch(() => {});
   },
 };

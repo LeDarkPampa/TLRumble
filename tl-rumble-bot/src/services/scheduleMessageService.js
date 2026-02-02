@@ -13,6 +13,7 @@ import {
   updateSlotScheduleIds,
 } from './slotService.js';
 import { getFeedChannelsExcluding } from './feedService.js';
+import { getScheduleChannelId } from './scheduleChannelService.js';
 
 function formatSlotDatetime(isoUtc) {
   try {
@@ -50,13 +51,19 @@ function buildSlotEmbed(slot, registrationCount, groupNames) {
 
 /**
  * Envoie un nouveau message schedule pour un slot, crée le thread, enregistre les IDs.
+ * @returns {{ ok: boolean, error?: string }}
  */
 export async function postNewScheduleMessage(client, slot) {
-  const channelId = config.wargameScheduleChannelId;
-  if (!channelId) return null;
+  const channelId = getScheduleChannelId();
+  if (!channelId) return { ok: false, error: 'Aucun canal schedule configuré (utilise /schedule-setup sur le serveur principal).' };
 
-  const channel = await client.channels.fetch(channelId).catch(() => null);
-  if (!channel || channel.type !== ChannelType.GuildText) return null;
+  const channel = await client.channels.fetch(channelId).catch((err) => {
+    console.error('[schedule] Canal introuvable ou accès refusé:', channelId, err?.message);
+    return null;
+  });
+  if (!channel || channel.type !== ChannelType.GuildText) {
+    return { ok: false, error: 'Canal schedule introuvable ou type incorrect. Vérifier que le bot a accès au canal (Voir le salon, Envoyer des messages, Intégrer des liens).' };
+  }
 
   const count = getRegistrationCountForSlot(slot.id);
   const groups = getRegistrationsForSlot(slot.id);
@@ -73,16 +80,25 @@ export async function postNewScheduleMessage(client, slot) {
       .setStyle(ButtonStyle.Secondary)
   );
 
-  const message = await channel.send({ embeds: [embed], components: [row] });
+  try {
+    const message = await channel.send({ embeds: [embed], components: [row] });
 
-  const threadName = `Wargame ${formatSlotDatetime(slot.datetime_utc)}`.slice(0, 100);
-  const thread = await message.startThread({
-    name: threadName,
-    type: ChannelType.PublicThread,
-  }).catch(() => null);
+    const threadName = `Wargame ${formatSlotDatetime(slot.datetime_utc)}`.slice(0, 100);
+    const thread = await message.startThread({
+      name: threadName,
+      type: ChannelType.PublicThread,
+    }).catch((err) => {
+      console.warn('[schedule] Création du thread échouée (le message a bien été posté):', err?.message);
+      return null;
+    });
 
-  updateSlotScheduleIds(slot.id, message.id, thread?.id ?? null);
-  return { message, thread };
+    updateSlotScheduleIds(slot.id, message.id, thread?.id ?? null);
+    return { ok: true };
+  } catch (err) {
+    console.error('[schedule] Envoi du message échoué:', err?.message);
+    const hint = ' Vérifier les permissions du bot : Voir le salon, Envoyer des messages, Intégrer des liens (et Lire l\'historique, Créer des fils publics si besoin).';
+    return { ok: false, error: (err?.message || 'Envoi refusé.') + hint };
+  }
 }
 
 /**
@@ -97,33 +113,61 @@ function buildFeedEmbed(slot) {
     .addFields(
       { name: '📅 Date / heure', value: localStr, inline: true },
       { name: '📊 Places', value: `Max ${slot.max_groups} groupes`, inline: true },
-      { name: 'ℹ️ Inscriptions', value: 'Les inscriptions se font sur le serveur **TL Rumble**. Rejoins le serveur pour t\'inscrire avec ton groupe de 6.', inline: false }
+      { name: 'ℹ️ Inscriptions', value: 'Clique sur **S\'inscrire avec mon groupe** ci-dessous. Les 6 joueurs doivent être membres du serveur **TL Rumble**.', inline: false }
     )
     .setTimestamp();
 }
 
 /**
  * Envoie un message dans les canaux feed des autres guildes (hors serveur principal).
+ * Inclut les boutons S'inscrire et Voir les inscrits pour permettre l'inscription depuis le serveur fils.
+ * @returns {{ sent: number, failed: number }} nombre de canaux où l'envoi a réussi / échoué
  */
 export async function postToFeedChannels(client, slot) {
   const mainGuildId = config.mainGuildId;
   const channels = getFeedChannelsExcluding(mainGuildId);
-  if (channels.length === 0) return;
+  if (channels.length === 0) return { sent: 0, failed: 0 };
 
   const embed = buildFeedEmbed(slot);
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`signup_slot_${slot.id}`)
+      .setLabel("S'inscrire avec mon groupe")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(`view_slot_${slot.id}`)
+      .setLabel('Voir les inscrits')
+      .setStyle(ButtonStyle.Secondary)
+  );
+
+  let sent = 0;
+  let failed = 0;
   for (const { guild_id, channel_id } of channels) {
     try {
-      const channel = await client.channels.fetch(channel_id).catch(() => null);
-      if (channel) await channel.send({ embeds: [embed] }).catch(() => {});
-    } catch (_) {}
+      const channel = await client.channels.fetch(channel_id).catch((err) => {
+        console.warn('[feed] Canal introuvable:', channel_id, 'guild:', guild_id, err?.message);
+        return null;
+      });
+      if (channel) {
+        await channel.send({ embeds: [embed], components: [row] }).then(() => { sent++; }).catch((err) => {
+          console.warn('[feed] Envoi échoué pour canal', channel_id, err?.message);
+          failed++;
+        });
+      } else {
+        failed++;
+      }
+    } catch (e) {
+      failed++;
+    }
   }
+  return { sent, failed };
 }
 
 /**
  * Met à jour le message schedule d'un slot (après inscription ou changement).
  */
 export async function updateScheduleMessage(client, slotId) {
-  const channelId = config.wargameScheduleChannelId;
+  const channelId = getScheduleChannelId();
   if (!channelId) return;
 
   const slot = getSlotById(slotId);
@@ -152,4 +196,25 @@ export async function updateScheduleMessage(client, slotId) {
   );
 
   await message.edit({ embeds: [embed], components: [row] }).catch(() => {});
+}
+
+/**
+ * Supprime le message schedule et le thread Discord d'un créneau (avant suppression en base).
+ * Appelé avant deleteSlot pour récupérer les IDs du slot.
+ */
+export async function deleteScheduleMessage(client, slot) {
+  const channelId = getScheduleChannelId();
+  if (!channelId || !slot?.schedule_message_id) return;
+
+  const channel = await client.channels.fetch(channelId).catch(() => null);
+  if (!channel) return;
+
+  const message = await channel.messages.fetch(slot.schedule_message_id).catch(() => null);
+  if (message) {
+    if (slot.schedule_thread_id) {
+      const thread = await client.channels.fetch(slot.schedule_thread_id).catch(() => null);
+      if (thread) await thread.delete().catch(() => {});
+    }
+    await message.delete().catch(() => {});
+  }
 }

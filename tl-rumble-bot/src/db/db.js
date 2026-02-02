@@ -8,14 +8,30 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let db = null;
 
+const FALLBACK_DB_PATH = '/app/data/tl-rumble.sqlite';
+
+function openDatabase(path) {
+  const dir = dirname(path);
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  return new Database(path);
+}
+
 export function getDb(databasePath) {
   if (db) return db;
 
-  const path = databasePath || process.env.DATABASE_PATH || './data/tl-rumble.sqlite';
-  const dir = dirname(path);
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const path = databasePath || process.env.DATABASE_PATH || '/data/tl-rumble.sqlite';
 
-  db = new Database(path);
+  try {
+    db = openDatabase(path);
+  } catch (e) {
+    const isCantOpen = e?.code === 'SQLITE_CANTOPEN' || e?.message?.includes('unable to open database file');
+    if (isCantOpen && path !== FALLBACK_DB_PATH) {
+      console.warn('[db] Impossible d\'ouvrir', path, '- repli sur', FALLBACK_DB_PATH);
+      db = openDatabase(FALLBACK_DB_PATH);
+    } else {
+      throw e;
+    }
+  }
 
   const schemaPath = join(__dirname, 'schema.sql');
   const schema = readFileSync(schemaPath, 'utf-8');
@@ -76,6 +92,15 @@ export function getDb(databasePath) {
   } catch (e) {
     if (!e.message?.includes('already exists')) throw e;
   }
+
+  const createScheduleChannelTable = `
+    CREATE TABLE IF NOT EXISTS guild_schedule_channels (
+      guild_id   TEXT PRIMARY KEY,
+      channel_id TEXT NOT NULL,
+      created_at TEXT
+    )
+  `;
+  db.exec(createScheduleChannelTable);
 
   return db;
 }

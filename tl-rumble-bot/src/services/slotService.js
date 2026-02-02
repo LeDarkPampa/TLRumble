@@ -42,6 +42,35 @@ export function listSlots() {
 }
 
 /**
+ * Liste les slots ouverts (OPEN) avec le nombre d'inscriptions.
+ */
+export function listOpenSlots() {
+  const db = getDb();
+  const slots = db.prepare(`
+    SELECT s.id, s.datetime_utc, s.status, s.max_groups, s.created_at,
+           COUNT(r.id) AS registration_count
+    FROM slots s
+    LEFT JOIN registrations r ON r.slot_id = s.id
+    WHERE s.status = 'OPEN'
+    GROUP BY s.id
+    ORDER BY s.datetime_utc ASC
+  `).all();
+  return slots;
+}
+
+/**
+ * Ferme un créneau aux inscriptions (statut CLOSED).
+ * @returns { boolean } true si le créneau existait et était OPEN
+ */
+export function closeSlot(slotId) {
+  const db = getDb();
+  const slot = db.prepare('SELECT id, status FROM slots WHERE id = ?').get(slotId);
+  if (!slot || slot.status === 'CLOSED') return false;
+  db.prepare('UPDATE slots SET status = ? WHERE id = ?').run('CLOSED', slotId);
+  return true;
+}
+
+/**
  * Récupère un slot par ID.
  */
 export function getSlotById(id) {
@@ -102,4 +131,17 @@ export function getSlotsForReminder() {
 export function markReminderSent(slotId) {
   const db = getDb();
   db.prepare('UPDATE slots SET reminder_sent = 1 WHERE id = ?').run(slotId);
+}
+
+/**
+ * Supprime un créneau et toutes ses inscriptions.
+ * @returns { boolean } true si le créneau existait et a été supprimé
+ */
+export function deleteSlot(slotId) {
+  const db = getDb();
+  const slot = db.prepare('SELECT id FROM slots WHERE id = ?').get(slotId);
+  if (!slot) return false;
+  db.prepare('DELETE FROM registrations WHERE slot_id = ?').run(slotId);
+  db.prepare('DELETE FROM slots WHERE id = ?').run(slotId);
+  return true;
 }

@@ -14,8 +14,21 @@ RUN npm ci --omit=dev
 
 COPY src ./src
 
-# Données et DB montés en volume ; le schéma est appliqué au premier lancement
-ENV NODE_ENV=production
-USER node
+# Script d'entrée : DB toujours dans /app/data (volume nommé) pour éviter SQLITE_CANTOPEN sur NAS
+RUN apt-get update && apt-get install -y --no-install-recommends gosu && rm -rf /var/lib/apt/lists/*
+RUN printf '%s\n' \
+  '#!/bin/sh' \
+  'set -e' \
+  'mkdir -p /app/data' \
+  'chown node:node /app/data' \
+  'export DATABASE_PATH=/app/data/tl-rumble.sqlite' \
+  'if [ $# -gt 0 ]; then' \
+  '  exec gosu node "$@"' \
+  'else' \
+  '  exec gosu node node src/index.js' \
+  'fi' \
+  > /entrypoint.sh && chmod +x /entrypoint.sh
 
-CMD ["node", "src/index.js"]
+ENV NODE_ENV=production
+
+ENTRYPOINT ["/entrypoint.sh"]

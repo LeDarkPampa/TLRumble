@@ -1,152 +1,157 @@
 # Contexte & Architecture – TL Rumble Bot
 
-Ce fichier sert de **référence rapide** pour retrouver le contexte et l’architecture du projet (pour l’IA, les contributeurs ou toi-même plus tard).
+Référence rapide du projet (pour l’IA, les contributeurs ou toi-même plus tard). Dernière analyse : état actuel du code.
 
 ---
 
 ## 1. Contexte du projet
 
 - **Nom :** TL Rumble – Bot Discord  
-- **Usage :** Serveur Discord **TL Rumble** (jeu Throne and Liberty)  
-- **Objectif :** Gérer les **créneaux wargame** (slots) et les **inscriptions** par groupes de **6 joueurs**.  
-- **Scope V1 :** MVP uniquement (création de slots, liste, inscription). Pas de génération d’équipes, pas de notifications, pas de MMR.  
-- **Déploiement cible :** Machine locale puis NAS (Docker-ready plus tard).
+- **Usage :** Serveur Discord **TL Rumble** (jeu Throne and Liberty) + serveurs « fils » (annonces des créneaux).  
+- **Objectif :** Gérer les **créneaux wargame** (slots), les **inscriptions** par groupes de **6 joueurs**, et diffuser les annonces vers d’autres serveurs.  
+- **Déploiement :** Local (Node) ou NAS (Docker, volume `app-data` pour la base SQLite).
 
 ---
 
 ## 2. Stack technique
 
-| Élément | Choix |
-|--------|--------|
-| Runtime | Node.js 18+ |
-| Librairie Discord | discord.js v14 |
-| Config | dotenv (.env) |
-| Base de données V1 | SQLite (better-sqlite3) |
-| Modules | ES modules (`"type": "module"`) |
+| Élément      | Choix                |
+|-------------|----------------------|
+| Runtime     | Node.js 18+          |
+| Discord     | discord.js v14       |
+| Config      | dotenv (.env)        |
+| Base de données | SQLite (better-sqlite3) |
+| Modules     | ES modules (`"type": "module"`) |
 
 ---
 
-## 3. Décisions métier validées
-
-| Sujet | Décision |
-|-------|----------|
-| **Nom du groupe** | `"Groupe " + displayName` de celui qui fait `/signup` (fallback `username`) |
-| **Qui inscrit** | Un des 6 joueurs fait `/signup` avec ses 5 coéquipiers ; pas de “leader” séparé |
-| **Rôle staff** | **Moderator** pour créer les slots (les admins sont aussi moderator) |
-| **Rôle joueur** | **Wargame Player** pour s’inscrire (nom sans emoji) |
-| **Max groupes par slot** | **16** par défaut, modifiable à la création du slot |
-| **Dates** | Stockage en **UTC** ; affichage en timezone configurable (`SERVER_TIMEZONE`) |
-| **Saisie date/heure** | Pour `/slot create`, date et heure sont interprétées en **UTC** (à améliorer en saisie locale si besoin) |
-| **Serveur Discord** | Un seul serveur (une guild) ; les 6 joueurs doivent être membres de ce serveur |
-
----
-
-## 4. Architecture des dossiers
+## 3. Structure actuelle du projet
 
 ```
 tl-rumble-bot/
 ├── src/
-│   ├── index.js              # Point d'entrée : config, db, load commands/events, login
-│   ├── config.js             # Lecture .env (token, clientId, guildId, rôles, timezone, db path)
-│   ├── deploy-commands.js    # Enregistrement des slash commands (guild ou global)
-│   ├── commands/             # Une commande = un fichier, export { data, execute }
-│   │   ├── ping.js           # /ping
-│   │   ├── slot.js           # /slot create, /slot list (subcommands)
-│   │   └── signup.js         # /signup (slot + 6 users)
-│   ├── services/             # Logique métier + accès DB
-│   │   ├── slotService.js    # createSlot, listSlots, getSlotById, getRegistrationCountForSlot
-│   │   └── signupService.js   # validateSignup, createRegistration, isUserRegisteredInSlot
+│   ├── index.js                 # Point d'entrée : config, db, load commands/events, login
+│   ├── config.js                # Lecture .env (token, clientId, rôles, timezone, db path, mainGuildId)
+│   ├── deploy-commands.js       # Enregistrement slash commands (global + guild pour listen-messages, servers)
+│   ├── commands/
+│   │   ├── ping.js              # /ping
+│   │   ├── slot.js              # /slot create | list | info | close | delete
+│   │   ├── signup.js            # /signup (slot + 6 joueurs)
+│   │   ├── tl-feed-setup.js     # /tl-feed-setup (canal) — serveurs autres que principal
+│   │   ├── schedule-setup.js    # /schedule-setup (canal) — principal = schedule ; autres = feed
+│   │   ├── listen-messages.js   # /listen-messages (enable/disable/status, enable-for-server, disable-for-server)
+│   │   └── servers.js           # /servers — liste des serveurs + salons (Moderator, principal uniquement)
+│   ├── services/
+│   │   ├── slotService.js       # createSlot, listSlots, getSlotById, deleteSlot, getRegistrationsForSlot, etc.
+│   │   ├── signupService.js     # validateSignup, createRegistration, isUserRegisteredInSlot
+│   │   ├── feedService.js       # getFeedChannels, getFeedChannelsExcluding, setFeedChannel, getFeedChannelForGuild
+│   │   ├── scheduleChannelService.js  # getScheduleChannelId, setScheduleChannel, getScheduleChannelForGuild
+│   │   ├── scheduleMessageService.js  # postNewScheduleMessage, postToFeedChannels, updateScheduleMessage, deleteScheduleMessage
+│   │   ├── teamService.js             # generateTeamsForSlot, postTeamsForSlot (équipes au rappel)
+│   │   └── listeningService.js        # isGuildListening, setGuildListening
 │   ├── db/
-│   │   ├── db.js             # getDb(path), closeDb(), chargement schema.sql
-│   │   └── schema.sql        # slots + registrations
+│   │   ├── db.js                # getDb (repli /app/data si SQLITE_CANTOPEN), schema + migrations
+│   │   └── schema.sql           # slots, registrations, guild_feed_channels, guild_message_listening, message_log
 │   ├── handlers/
-│   │   ├── commandHandler.js # Charge tous les .js dans commands/ (récursif)
-│   │   └── eventHandler.js   # Charge tous les events depuis events/
+│   │   ├── commandHandler.js    # Charge tous les .js dans commands/
+│   │   └── eventHandler.js     # Charge tous les events depuis events/
 │   └── events/
-│       ├── ready.js          # once: ready
-│       └── interactionCreate.js  # ChatInputCommand → command.execute(interaction)
-├── data/                     # Créé au runtime (SQLite)
-├── .env                      # Non versionné
+│       ├── ready.js             # Rappels 10 min avant wargame + postTeamsForSlot (getScheduleChannelId)
+│       ├── interactionCreate.js # Boutons signup/view_slot, modal signup, commandes slash + garde main-guild pour servers/listen-messages
+│       └── messageCreate.js     # Enregistrement messages (message_log) si écoute activée
+├── docker-compose.yml           # Volume app-data:/app/data, env_file .env
+├── Dockerfile                   # node:20-bookworm-slim, entrypoint : DATABASE_PATH=/app/data/tl-rumble.sqlite
 ├── .env.example
-├── CONTEXT_ARCHITECTURE.md   # Ce fichier
-├── RESTE_A_FAIRE.md          # Backlog / tâches
-└── README.md
+├── CONTEXT_ARCHITECTURE.md      # Ce fichier
+├── README.md
+└── docs/
+    └── DEPLOIEMENT_NAS.md
 ```
 
 ---
 
-## 5. Flux principaux
+## 4. Commandes (état actuel)
 
-### Démarrage
+| Commande | Où visible | Qui | Rôle |
+|----------|------------|-----|------|
+| `/ping` | Partout (global) | Tous | Test |
+| `/slot create` | Partout | Serveur principal uniquement si `MAIN_GUILD_ID` | Moderator/Admin |
+| `/slot list` | Partout | Tous | Liste des créneaux |
+| `/slot info id:<id>` | Partout | Tous | Détail d’un créneau |
+| `/slot close id:<id>` | Partout | Serveur principal, Moderator/Admin | Ferme le créneau aux inscriptions (statut CLOSED, bouton désactivé) |
+| `/slot delete id:<id>` | Partout | Serveur principal, Moderator/Admin | Supprime créneau + inscriptions + message schedule |
+| `/signup` | Partout | Serveur principal si `MAIN_GUILD_ID` | Wargame Player, un des 6 joueurs |
+| `/tl-feed-setup` | Partout | Serveurs **autres que** principal | Gérer le serveur — canal des annonces |
+| `/schedule-setup` | Partout | Principal = canal schedule ; autres = canal feed | Principal : Moderator ; autres : Gérer le serveur |
+| `/listen-messages` | **Serveur principal uniquement** (guild) | Principal | ManageGuild ; enable-for-server/disable-for-server = Moderator |
+| `/servers` | **Serveur principal uniquement** (guild) | Principal | Moderator/Admin — liste des guildes + salons |
 
-1. `index.js` : `validateConfig()` → `getDb(config.databasePath)` → `loadCommands(client)` → `loadEvents(client)` → `client.login(config.token)`  
-2. Commandes : chargées depuis `commands/` (fichiers et sous-dossiers), stockées dans `client.commands` (Collection).  
-3. Events : `ready`, `interactionCreate` ; pour une commande slash, `interactionCreate` appelle `command.execute(interaction)`.
-
-### Création d’un slot
-
-- Utilisateur : `/slot create` (date YYYY-MM-DD, time HH:mm, optionnel max_groups).  
-- Vérification : rôle Moderator ou Admin.  
-- `slotService.createSlot(datetimeUtcIso, maxGroups)` : rejet si même `datetime_utc` existe déjà.  
-- Stockage : `slots` (datetime_utc, status OPEN, max_groups, created_at).
-
-### Inscription
-
-- Utilisateur : `/signup` (slot = ID, player1…player6 = User).  
-- Vérification : rôle Wargame Player ou Admin ; l’auteur doit être un des 6 ; les 6 distincts et membres du serveur.  
-- `signupService.validateSignup(interaction, slotId, playerIds)` : slot existant/OPEN, pas full, pas déjà inscrit, etc.  
-- `signupService.createRegistration(slotId, registrantId, "Groupe " + displayName, playerIds)`.  
-- Table : `registrations` (slot_id, registrant_id, group_display_name, player1_id…player6_id).
+- **Déploiement des commandes :** si `MAIN_GUILD_ID` est défini, les commandes **listen-messages** et **servers** sont enregistrées uniquement sur ce serveur (guild) ; les autres sont en globales.  
+- **Garde dans `interactionCreate` :** si quelqu’un appelle `/servers` ou `/listen-messages` hors du serveur principal, le bot répond que la commande n’est disponible que sur TL Rumble.
 
 ---
 
-## 6. Base de données (V1)
+## 5. Base de données (SQLite)
 
-- **Moteur :** SQLite, fichier par défaut `./data/tl-rumble.sqlite`.  
+- **Fichier :** `DATABASE_PATH` (.env) ou repli `/data/tl-rumble.sqlite` puis `/app/data/tl-rumble.sqlite` si SQLITE_CANTOPEN (Docker NAS).  
 - **Tables :**
-  - **slots** : id, datetime_utc (TEXT ISO), status (OPEN/CLOSED), max_groups, created_at. Unicité sur `datetime_utc`.  
-  - **registrations** : id, slot_id, registrant_id, group_display_name, player1_id…player6_id, created_at. Unicité `(slot_id, registrant_id)`.  
-  - **guild_feed_channels** : guild_id, channel_id, created_at.  
-  - **guild_message_listening** : guild_id, enabled (0/1), created_at, updated_at. Écoute des messages par serveur (activée/désactivée via `/listen-messages`).  
-  - **message_log** : id, guild_id, channel_id, channel_name, author_id, author_tag, author_name, content (tronqué 2000 car.), message_id, created_at. Historique des messages lorsque l’écoute est activée.  
-- **Contraintes en code :** 6 joueurs distincts ; registrant parmi les 6 ; aucun joueur déjà inscrit pour ce slot ; count < max_groups.
-- **Intent privilégié :** **Message Content** (Discord Developer Portal → Bot) requis pour que le contenu des messages soit enregistré dans `message_log`.
+  - **slots** — id, datetime_utc, status (OPEN/CLOSED), max_groups, created_at, schedule_message_id, schedule_thread_id, reminder_sent  
+  - **registrations** — id, slot_id, registrant_id, group_display_name, player1_id…player6_id, created_at  
+  - **guild_feed_channels** — guild_id, channel_id (canal des annonces sur les serveurs fils)  
+  - **guild_schedule_channels** — guild_id, channel_id (créé en migration dans db.js ; canal schedule ; prioritaire sur `WARGAME_SCHEDULE_CHANNEL_ID`)  
+  - **guild_message_listening** — guild_id, enabled (0/1)  
+  - **message_log** — historique des messages quand l’écoute est activée  
 
 ---
 
-## 7. Variables d’environnement
+## 6. Variables d’environnement
 
 | Variable | Obligatoire | Description |
 |----------|-------------|-------------|
 | BOT_TOKEN | Oui | Token du bot Discord |
-| CLIENT_ID | Oui | Application ID du bot |
-| MODERATOR_ROLE_ID | Oui | ID du rôle Moderator (création slots) |
-| WARGAME_PLAYER_ROLE_ID | Oui | ID du rôle Wargame Player (inscription) |
-| GUILD_ID | Non | Si défini : déploiement des commandes en guild (dev) |
-| SERVER_TIMEZONE | Non | Timezone d’affichage (défaut Europe/Paris) |
-| DATABASE_PATH | Non | Chemin fichier SQLite (défaut ./data/tl-rumble.sqlite) |
-| MAIN_GUILD_ID | Non | ID du serveur principal TL Rumble. Si défini : mode multi-guildes (create/signup uniquement sur ce serveur ; autres = feed + /slot list + /tl-feed-setup). |
+| CLIENT_ID | Oui | Application ID |
+| MODERATOR_ROLE_ID | Oui | Rôle pour créer slots, delete, listen-messages, servers |
+| WARGAME_PLAYER_ROLE_ID | Oui | Rôle pour s’inscrire |
+| GUILD_ID | Non | Déploiement des commandes en guild (dev) |
+| SERVER_TIMEZONE | Non | Défaut Europe/Paris |
+| DATABASE_PATH | Non | Défaut ./data/tl-rumble.sqlite ; en Docker NAS souvent /app/data/tl-rumble.sqlite |
+| WARGAME_SCHEDULE_CHANNEL_ID | Non | Canal schedule (fallback si pas de ligne en base dans guild_schedule_channels) |
+| MAIN_GUILD_ID | Non | ID du serveur principal ; si défini : create/signup/schedule-setup (schedule) et listen-messages/servers limités à ce serveur ; feed sur les autres |
 
 ---
 
-## 8. Où modifier quoi
+## 7. Flux principaux
+
+- **Démarrage :** `validateConfig()` → `getDb(config.databasePath)` (repli /app/data si erreur) → `loadCommands` → `loadEvents` → `client.login()`.  
+- **Création de slot :** `/slot create` → `slotService.createSlot` → si canal schedule configuré (`getScheduleChannelId()` : base puis env), `postNewScheduleMessage` + `postToFeedChannels` (tous les canaux feed hors serveur principal).  
+- **Canal schedule :** `scheduleChannelService.getScheduleChannelId()` = `guild_schedule_channels` pour `MAIN_GUILD_ID`, sinon `WARGAME_SCHEDULE_CHANNEL_ID`. Configurable via `/schedule-setup` sur le serveur principal.  
+- **Feed (annonces sur autres serveurs) :** `feedService.getFeedChannelsExcluding(mainGuildId)` ; si `mainGuildId` vide, tous les canaux feed ; sinon tous sauf le serveur principal. Configurable via `/tl-feed-setup` ou `/schedule-setup` sur chaque serveur fils.  
+- **Inscription :** Bouton « S'inscrire » ou `/signup` → `signupService.validateSignup` → `createRegistration` → `updateScheduleMessage`.  
+- **Rappel 10 min avant :** `ready.js` + intervalle → `getSlotsForReminder` → envoi dans le thread du slot ou dans le canal schedule (`getScheduleChannelId()`) + **postTeamsForSlot** (embed équipes).
+
+---
+
+## 8. Docker / NAS
+
+- **Image :** Node 20 bookworm-slim, build des deps (better-sqlite3), gosu pour lancer le bot en tant que `node`.  
+- **Entrypoint :** crée `/app/data`, `chown node`, `export DATABASE_PATH=/app/data/tl-rumble.sqlite`, puis `node src/index.js` (ou la commande passée).  
+- **Volume :** `app-data:/app/data` (base SQLite persistante). Pas de montage `./data` par défaut pour éviter SQLITE_CANTOPEN sur NAS.  
+- **Déploiement des commandes sur NAS :** `docker compose run --rm tl-rumble-bot node src/deploy-commands.js` (avec le .env du projet).
+
+---
+
+## 9. Où modifier quoi
 
 | Besoin | Fichier(s) |
 |--------|------------|
-| Ajouter une commande slash | Nouveau fichier dans `src/commands/` avec `data` (SlashCommandBuilder) et `execute(interaction)` |
-| Changer la logique slots | `src/services/slotService.js` |
-| Changer les règles d’inscription | `src/services/signupService.js` (validateSignup, createRegistration) |
-| Changer le schéma DB | `src/db/schema.sql` + migrations si besoin |
-| Changer config / env | `src/config.js` et `.env.example` |
-| Permissions / rôles | Vérifications dans les commandes (`config.moderatorRoleId`, `config.wargamePlayerRoleId`) |
+| Nouvelle commande slash | Nouveau fichier dans `src/commands/` (data + execute) |
+| Logique slots / inscriptions | `slotService.js`, `signupService.js` |
+| Génération / envoi des équipes (rappel) | `teamService.js` |
+| Canal schedule / feed | `scheduleChannelService.js`, `feedService.js`, `scheduleMessageService.js` |
+| Schéma DB | `schema.sql` + migrations dans `db.js` si besoin |
+| Config / env | `config.js`, `.env.example` |
+| Commandes réservées au serveur principal | `deploy-commands.js` (MAIN_GUILD_ONLY_COMMANDS), `interactionCreate.js` (garde) |
 
 ---
 
-## 9. Références externes
-
-- Spec détaillée : `discord-bots/examples/tl-rumble-spec/SPEC_TL_RUMBLE_V1.md` (dans le repo CursorBot).  
-- discord.js v14 : [SlashCommandBuilder](https://discord.js.org/#/docs/main/14/class/SlashCommandBuilder), [ApplicationCommandOptionType](https://discord.js.org/#/docs/main/14/typedef/ApplicationCommandOptionType).
-
----
-
-*Dernière mise à jour : à adapter à chaque changement d’architecture ou de décision importante.*
+*Dernière mise à jour : réanalyse complète du projet.*

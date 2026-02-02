@@ -29,10 +29,7 @@ Convient aux NAS avec **Docker** (Synology DSM 7+, QNAP Container Station, etc.)
 
    Ne pas définir `DATABASE_PATH` dans `.env` : le compose utilise `/data/tl-rumble.sqlite` dans le volume.
 
-3. Créer le dossier des données (optionnel, le compose le crée souvent au premier run) :
-   ```bash
-   mkdir -p data
-   ```
+3. Aucun dossier à créer pour la base : elle est stockée dans un **volume Docker** (`app-data`), ce qui évite les erreurs « unable to open database file » sur NAS.
 
 ### 2. Lancer avec Docker Compose
 
@@ -57,25 +54,18 @@ Arrêt :
 docker compose down
 ```
 
-Les données restent dans le volume `./data` (ou le chemin indiqué dans `volumes`).
+Les données (base SQLite) restent dans le volume Docker `app-data`.
 
-### 3. Adapter le chemin des données sur le NAS
+### 3. Stocker la base sur un dossier du NAS (optionnel)
 
-Dans `docker-compose.yml`, le volume est par défaut :
-
-```yaml
-volumes:
-  - ./data:/data
-```
-
-Pour stocker les données sur un volume NAS précis (ex. Synology) :
+Par défaut, la base SQLite est dans le volume Docker `app-data`. Pour la placer sur un dossier de votre NAS (sauvegardes, partage), montez ce dossier sur `/app/data` :
 
 ```yaml
 volumes:
-  - /volume1/docker/tl-rumble-bot/data:/data
+  - /volume1/docker/tl-rumble-bot/data:/app/data
 ```
 
-Adaptez le chemin gauche à votre NAS ; le droit (`/data`) doit rester tel quel (c’est le chemin dans le conteneur).
+Assurez-vous que le conteneur peut écrire dans ce dossier (ex. `chown 1000:1000` sur le dossier).
 
 ### 4. Déployer les commandes Discord
 
@@ -142,8 +132,8 @@ npm start
 |----------------|--------------------------------|------------------------------------|
 | Code           | Dans l’image (build)          | Dossier du projet sur le NAS      |
 | `.env`         | À côté de `docker-compose.yml`| À la racine du projet              |
-| Base SQLite    | Volume monté sur `/data`      | `DATABASE_PATH` dans `.env`       |
-| Accès DB       | Fichier dans `./data` (host)  | Fichier pointé par `DATABASE_PATH`|
+| Base SQLite    | Volume Docker `app-data` (`/app/data`) | `DATABASE_PATH` dans `.env`       |
+| Accès DB       | Volume nommé ou montage sur `/app/data`| Fichier pointé par `DATABASE_PATH`|
 
 ---
 
@@ -157,6 +147,7 @@ npm start
 
 ## Dépannage
 
+- **« SqliteError: unable to open database file »** : avec la configuration actuelle, la base est toujours dans le volume Docker `app-data` (`/app/data`). Reconstruisez l’image et redémarrez : `docker compose up -d --build`. Si vous avez personnalisé les volumes pour monter un dossier NAS sur `/app/data`, vérifiez les droits en écriture (ex. `chown 1000:1000` sur ce dossier).
 - **Le bot ne se connecte pas** : vérifier `BOT_TOKEN`, pare-feu / proxy du NAS (le client Discord doit pouvoir joindre Internet).
-- **Base corrompue ou vide** : supprimer `data/tl-rumble.sqlite` (après sauvegarde si besoin) ; le schéma sera recréé au prochain démarrage.
+- **Base corrompue ou vide** : en Docker, supprimer le volume `app-data` (`docker compose down -v` puis relancer) ou le fichier dans le conteneur ; le schéma sera recréé au prochain démarrage.
 - **Commandes slash absentes** : lancer une fois `deploy-commands.js` (voir section Docker ci‑dessus ou équivalent en Node direct).
