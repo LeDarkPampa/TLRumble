@@ -1,0 +1,14 @@
+# Récap Raid-Helper - Conteneur qui tourne en continu et envoie le récap tous les jours à 23h
+# Comme tl-rumble-bot : démarrer / redémarrer depuis l'interface du NAS (Docker).
+# Usage : .env à côté (avec TIMEZONE=Europe/Paris), puis docker compose up -d
+
+services:
+  raid-helper-recap:
+    build: .
+    container_name: raid-helper-recap
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      # Heure du récap (23h) : utiliser le fuseau du .env ou défaut Europe/Paris
+      - TZ=${TIMEZONE:-Europe/Paris}

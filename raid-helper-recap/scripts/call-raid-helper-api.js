@@ -44,14 +44,16 @@ function loadEnv() {
 loadEnv();
 
 const apiKey = process.env.RAID_HELPER_API_KEY;
-const guildId = process.env.RAID_HELPER_GUILD_ID;
+const guildId = String(process.env.RAID_HELPER_GUILD_ID || '').trim();
 
 if (!apiKey || !guildId) {
   console.error('RAID_HELPER_API_KEY et RAID_HELPER_GUILD_ID doivent être définis dans .env');
   process.exit(1);
 }
 
-const url = `https://api.raid-helper.dev/v1/events/${guildId}`;
+// API hébergée sur raid-helper.dev (certificat SSL pour ce domaine, pas api.raid-helper.dev)
+// v3 : tous les événements du serveur — https://raid-helper.dev/documentation/api
+const url = `https://raid-helper.dev/api/v3/servers/${guildId}/events`;
 
 const headers = {
   Authorization: apiKey,
@@ -69,17 +71,24 @@ function handleResponse(data, outPath) {
   if (json.message) {
     console.log('Message API :', json.message);
   }
-  const events = Array.isArray(json) ? json : (json.events || []);
+  // v3 API : événements dans "postedEvents" (pas "events")
+  const events = Array.isArray(json)
+    ? json
+    : (json.postedEvents || json.events || []);
   const hasEvents = Array.isArray(events) && events.length > 0;
 
   if (!hasEvents) {
     console.log('L\'API Raid-Helper répond correctement.');
     console.log('Aucun événement pour ce serveur (liste vide ou pas de données).');
-    console.log('C\'est normal si le serveur n\'a pas d\'événements Raid-Helper récents ou si la période ne contient rien.');
+    console.log('Clés de la réponse :', Object.keys(json).join(', '));
+    if (json.eventsOverall !== undefined) {
+      console.log('eventsOverall :', json.eventsOverall);
+    }
   } else {
     console.log('Réponse reçue. Structure :');
     console.log('- Type racine :', Array.isArray(json) ? 'tableau' : typeof json);
     console.log('- Nombre d\'événements :', events.length);
+    if (json.eventsOverall !== undefined) console.log('- eventsOverall :', json.eventsOverall);
     const first = events[0];
     console.log('- Clés du 1er événement :', Object.keys(first).join(', '));
     if (first.signups) {
@@ -87,8 +96,10 @@ function handleResponse(data, outPath) {
       if (first.signups[0]) {
         console.log('- Clés d\'un signup :', Object.keys(first.signups[0]).join(', '));
       }
+    } else if (first.signUpCount !== undefined) {
+      console.log('- signUpCount (1er event) :', first.signUpCount, '(détail signups peut nécessiter un autre endpoint)');
     }
-    if (first.startTime !== undefined) console.log('- startTime (1er event) :', first.startTime);
+    if (first.startTime !== undefined) console.log('- startTime (1er event) :', first.startTime, '(timestamp Unix)');
     console.log('\n---\nRéponse complète (extrait) :\n');
     console.log(JSON.stringify(json, null, 2).slice(0, 3000) + (JSON.stringify(json).length > 3000 ? '...' : ''));
   }
@@ -157,8 +168,8 @@ async function run() {
     console.error('Erreur réseau :', e.message);
     if (e.cause) console.error('Cause :', e.cause.code || e.cause.message);
     console.error('\nVérifier :');
-    console.error('  - Ouverture de https://api.raid-helper.dev dans le navigateur (page ou erreur SSL ?)');
-    console.error('  - Test curl : curl -v -H "Authorization: TA_CLE" "https://api.raid-helper.dev/v1/events/' + guildId + '"');
+    console.error('  - Ouverture de https://raid-helper.dev dans le navigateur (page ou erreur SSL ?)');
+    console.error('  - Test curl : curl -v -H "Authorization: TA_CLE" "https://raid-helper.dev/api/v3/servers/' + guildId + '/events"');
     process.exit(1);
   }
 }

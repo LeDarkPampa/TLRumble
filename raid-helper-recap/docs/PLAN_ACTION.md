@@ -10,7 +10,7 @@ La spec est figée. Voici les **prochaines étapes** dans l’ordre pour passer 
 
 1. **Obtenir la clé API** du serveur (commande `/apikey` sur le serveur Discord — visible par admin / manage server) et l’ID de ta guilde.
 2. **Appeler l’endpoint** à la main :
-   - `GET https://api.raid-helper.dev/v1/events/{GUILD_ID}`
+   - `GET https://raid-helper.dev/api/v3/servers/{GUILD_ID}/events`
    - Header : `Authorization: <TA_CLÉ_API>` (la clé comme valeur, sans "Bearer")
 3. **Noter** :
    - Structure de la réponse (tableau `events` ? objet ?).

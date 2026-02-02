@@ -19,8 +19,9 @@ Script Node.js pour générer un **récap quotidien** du taux de réponse / pré
 
 Avant de coder, il faut **appeler l’API à la main** pour vérifier la structure des réponses.
 
-**URL :** `GET https://api.raid-helper.dev/v1/events/{GUILD_ID}`  
-**Header :** `Authorization: <TA_CLÉ_API>` (la clé API comme valeur, sans "Bearer" — selon la doc Raid-Helper).
+**URL :** `GET https://raid-helper.dev/api/v3/servers/{GUILD_ID}/events`  
+**Header :** `Authorization: <TA_CLÉ_API>` (la clé API comme valeur, sans "Bearer" — selon la doc Raid-Helper).  
+*L’API est hébergée sur `raid-helper.dev` (certificat SSL pour ce domaine ; `api.raid-helper.dev` provoquait ERR_TLS_CERT_ALTNAME_INVALID).*
 
 Tu as besoin de :
 - la **clé API du serveur** : commande `/apikey` sur ton serveur Discord (visible uniquement par les rôles admin ou « Gérer le serveur ») ;
@@ -42,7 +43,7 @@ La réponse s’affiche dans la console et est sauvegardée dans `docs/api-respo
 ### Option B : cURL (ligne de commande)
 
 ```bash
-curl -H "Authorization: TA_CLE_API" "https://api.raid-helper.dev/v1/events/GUILD_ID"
+curl -H "Authorization: TA_CLE_API" "https://raid-helper.dev/api/v3/servers/GUILD_ID/events"
 ```
 
 Remplacer `TA_CLE_API` (la valeur brute de la clé, sans "Bearer") et `GUILD_ID` par tes valeurs. Tu peux rediriger la sortie vers un fichier pour l’inspecter :  

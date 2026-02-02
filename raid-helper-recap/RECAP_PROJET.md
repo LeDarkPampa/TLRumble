@@ -91,8 +91,8 @@ Ce projet est **totalement indépendant de TL Rumble** : autre contexte (guilde 
 
 ### 5.2 Raid-Helper
 
-- **Endpoint :** `GET https://api.raid-helper.dev/v1/events/{GUILD_ID}`
-- **Headers :** `Authorization: Bearer <API_TOKEN>`
+- **Endpoint :** `GET https://raid-helper.dev/api/v3/servers/{GUILD_ID}/events` (tous les événements du serveur ; doc : https://raid-helper.dev/documentation/api)
+- **Headers :** `Authorization: <API_KEY>` (clé brute, sans "Bearer" ; à confirmer selon la doc)
 - Filtrer les événements dont `event.startTime` est dans l’intervalle **[lundi 0h, dimanche 23h59]** de la semaine en cours (heure locale). Ce jeu d’événements = **dénominateur fixe** pour tous les récaps de la semaine.
 - Pour chaque événement : `event.signups` (userId, status : accepted / tentative / declined / late / absent / none, etc.).  
 - **À définir côté script :** quels status comptent comme **réponse** (tout sauf none / pas de signup) et quels status comptent comme **présence** (ex. accepted uniquement, ou accepted + tentative selon ta règle).

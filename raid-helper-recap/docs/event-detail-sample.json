@@ -1,0 +1,1109 @@
+{
+  "date": "02-02-2026",
+  "signUps": [
+    {
+      "entryTime": 1769984806,
+      "specName": "Templar",
+      "name": "iSaaly",
+      "className": "Tank",
+      "specEmoteId": "1305473491696484394",
+      "id": 342644906,
+      "position": 3,
+      "classEmoteId": "878310168289505301",
+      "userId": "325537673328590848",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770028255,
+      "name": "Pef(pefette)",
+      "className": "Absence",
+      "id": 342700778,
+      "position": 12,
+      "classEmoteId": "612343589070045200",
+      "userId": "1113580362250072104",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770057258,
+      "specName": "Enigma",
+      "name": "Djomanion",
+      "className": "Dps",
+      "specEmoteId": "1418371414645276764",
+      "id": 342759743,
+      "position": 24,
+      "classEmoteId": "592440132129521664",
+      "userId": "1242915946964848743",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770054660,
+      "specName": "Seeker",
+      "name": "Hyuliana",
+      "className": "Healer",
+      "specEmoteId": "1305473487858700308",
+      "id": 342752708,
+      "position": 20,
+      "classEmoteId": "898011741735235645",
+      "userId": "382824557427425280",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769983844,
+      "name": "Goat99/TigerMask",
+      "className": "Absence",
+      "id": 342641996,
+      "position": 2,
+      "classEmoteId": "612343589070045200",
+      "userId": "612833139428950027",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770053303,
+      "specName": "Gladiator",
+      "name": "Tamrielle",
+      "className": "Dps",
+      "specEmoteId": "1314320011174608977",
+      "id": 342748871,
+      "position": 17,
+      "classEmoteId": "592440132129521664",
+      "userId": "839468942875426826",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770055795,
+      "specName": "Ravager",
+      "name": "Ønii",
+      "className": "Dps",
+      "specEmoteId": "1305473457370300456",
+      "id": 342755735,
+      "position": 23,
+      "classEmoteId": "592440132129521664",
+      "userId": "983824268578127912",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769983647,
+      "specName": "Crusader",
+      "name": "DarkPampa",
+      "className": "Tank",
+      "specEmoteId": "1305473376122441788",
+      "id": 342641380,
+      "position": 1,
+      "classEmoteId": "878310168289505301",
+      "userId": "883046854336598066",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770046609,
+      "name": "reups09",
+      "className": "Absence",
+      "id": 342731660,
+      "position": 15,
+      "classEmoteId": "612343589070045200",
+      "userId": "461959714452799498",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770054554,
+      "specName": "Crusader",
+      "name": "JoKoRiCo",
+      "className": "Tank",
+      "specEmoteId": "1305473376122441788",
+      "id": 342752411,
+      "position": 18,
+      "classEmoteId": "878310168289505301",
+      "userId": "367418358083092491",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769985986,
+      "name": "Ellia",
+      "className": "Absence",
+      "id": 342648032,
+      "position": 5,
+      "classEmoteId": "612343589070045200",
+      "userId": "234042979747102720",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770054971,
+      "specName": "Invocator",
+      "name": "Kamillesama",
+      "className": "Dps",
+      "specEmoteId": "1305473414923812914",
+      "id": 342753515,
+      "position": 21,
+      "classEmoteId": "592440132129521664",
+      "userId": "1136761446466863174",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769986029,
+      "specName": "Gladiator",
+      "name": "Mozorh",
+      "className": "Dps",
+      "specEmoteId": "1314320011174608977",
+      "id": 342648136,
+      "position": 6,
+      "classEmoteId": "592440132129521664",
+      "userId": "451006999707123714",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769985685,
+      "specName": "Crusader",
+      "name": "Billyyyyy",
+      "className": "Tank",
+      "specEmoteId": "1305473376122441788",
+      "id": 342647296,
+      "position": 4,
+      "classEmoteId": "878310168289505301",
+      "userId": "1220429633615429904",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770016397,
+      "specName": "Spellblade",
+      "name": "sNow(Diablo18)",
+      "className": "Dps",
+      "specEmoteId": "1305473490685526067",
+      "id": 342686777,
+      "position": 10,
+      "classEmoteId": "592440132129521664",
+      "userId": "692113211775909989",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770037967,
+      "specName": "Crusader",
+      "name": "Greldy",
+      "className": "Tank",
+      "specEmoteId": "1305473376122441788",
+      "id": 342715098,
+      "position": 13,
+      "classEmoteId": "878310168289505301",
+      "userId": "1293272354650325184",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769994157,
+      "specName": "Steelheart",
+      "name": "Baphrodite",
+      "className": "Tank",
+      "specEmoteId": "1314320018644930630",
+      "id": 342662063,
+      "position": 8,
+      "classEmoteId": "878310168289505301",
+      "userId": "163074578246139904",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770055411,
+      "specName": "Seeker",
+      "name": "Despeed",
+      "className": "Healer",
+      "specEmoteId": "1305473487858700308",
+      "id": 342754721,
+      "position": 22,
+      "classEmoteId": "898011741735235645",
+      "userId": "741992673388396645",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770005169,
+      "specName": "Scout",
+      "name": "[TR]Z⊕ηzïßαr",
+      "className": "Dps",
+      "specEmoteId": "1305473460411301938",
+      "id": 342675165,
+      "position": 9,
+      "classEmoteId": "592440132129521664",
+      "userId": "346775020879740929",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1769987417,
+      "specName": "Liberator",
+      "name": "Arcia",
+      "className": "Dps",
+      "specEmoteId": "1305473416073052170",
+      "id": 342651275,
+      "position": 7,
+      "classEmoteId": "592440132129521664",
+      "userId": "293800454674972674",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770017958,
+      "specName": "Scorpion",
+      "name": "kiomy",
+      "className": "Dps",
+      "specEmoteId": "1305473458347704322",
+      "id": 342688434,
+      "position": 11,
+      "classEmoteId": "592440132129521664",
+      "userId": "412696593540710420",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770049760,
+      "specName": "Seeker",
+      "name": "niponyo",
+      "className": "Healer",
+      "specEmoteId": "1305473487858700308",
+      "id": 342739276,
+      "position": 16,
+      "classEmoteId": "898011741735235645",
+      "userId": "1098408783442628718",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770046560,
+      "specName": "Crusader",
+      "name": "Imotheps",
+      "className": "Tank",
+      "specEmoteId": "1305473376122441788",
+      "id": 342731538,
+      "position": 14,
+      "classEmoteId": "878310168289505301",
+      "userId": "1397547885175898165",
+      "status": "primary"
+    },
+    {
+      "entryTime": 1770054592,
+      "specName": "Seeker",
+      "name": "Roots",
+      "className": "Healer",
+      "specEmoteId": "1305473487858700308",
+      "id": 342752508,
+      "position": 19,
+      "classEmoteId": "898011741735235645",
+      "userId": "1292222775574134784",
+      "status": "primary"
+    }
+  ],
+  "color": "255,0,0",
+  "classes": [
+    {
+      "specs": [
+        {
+          "name": "Battleweaver",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473373828284476"
+        },
+        {
+          "name": "Berserker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473374969139220"
+        },
+        {
+          "name": "Cavalier",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320014425198602"
+        },
+        {
+          "name": "Crucifix",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371412145602674"
+        },
+        {
+          "name": "Crusader",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473376122441788"
+        },
+        {
+          "name": "Darkblighter",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473377791643658"
+        },
+        {
+          "name": "Disciple",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473378936946709"
+        },
+        {
+          "name": "Enigma",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371414645276764"
+        },
+        {
+          "name": "Eradicator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320012730830858"
+        },
+        {
+          "name": "Fury",
+          "roleName": "Melee",
+          "limit": 999,
+          "emoteId": "1305473380023013406"
+        },
+        {
+          "name": "Gladiator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320011174608977"
+        },
+        {
+          "name": "Guardian",
+          "roleName": "Tanks",
+          "limit": 999,
+          "emoteId": "1418371417778552953"
+        },
+        {
+          "name": "Impaler",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320017378115714"
+        },
+        {
+          "name": "Infiltrator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473413414129664"
+        },
+        {
+          "name": "Invocator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473414923812914"
+        },
+        {
+          "name": "Justicar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371419774910484"
+        },
+        {
+          "name": "Liberator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473416073052170"
+        },
+        {
+          "name": "Lunarch",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371422161604748"
+        },
+        {
+          "name": "Oracle",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371426204778527"
+        },
+        {
+          "name": "Outrider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473417360834672"
+        },
+        {
+          "name": "Paladin",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473419210653706"
+        },
+        {
+          "name": "Polaris",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371428209922178"
+        },
+        {
+          "name": "Raider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473454308327425"
+        },
+        {
+          "name": "Ranger",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473455562690592"
+        },
+        {
+          "name": "Ravager",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473457370300456"
+        },
+        {
+          "name": "Scorpion",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473458347704322"
+        },
+        {
+          "name": "Scout",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473460411301938"
+        },
+        {
+          "name": "Scryer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371430168399902"
+        },
+        {
+          "name": "Seeker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473487858700308"
+        },
+        {
+          "name": "Sentinel",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473489519640668"
+        },
+        {
+          "name": "Shadowdancer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320015670902794"
+        },
+        {
+          "name": "Spellblade",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473490685526067"
+        },
+        {
+          "name": "Steelheart",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320018644930630"
+        },
+        {
+          "name": "Templar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473491696484394"
+        },
+        {
+          "name": "Voidlance",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320019907280968"
+        },
+        {
+          "name": "Warden",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473493575401483"
+        }
+      ],
+      "name": "Tank",
+      "limit": 999,
+      "emoteId": "878310168289505301",
+      "type": "primary"
+    },
+    {
+      "specs": [
+        {
+          "name": "Battleweaver",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473373828284476"
+        },
+        {
+          "name": "Berserker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473374969139220"
+        },
+        {
+          "name": "Cavalier",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320014425198602"
+        },
+        {
+          "name": "Crucifix",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371412145602674"
+        },
+        {
+          "name": "Crusader",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473376122441788"
+        },
+        {
+          "name": "Darkblighter",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473377791643658"
+        },
+        {
+          "name": "Disciple",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473378936946709"
+        },
+        {
+          "name": "Enigma",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371414645276764"
+        },
+        {
+          "name": "Eradicator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320012730830858"
+        },
+        {
+          "name": "Fury",
+          "roleName": "Melee",
+          "limit": 999,
+          "emoteId": "1305473380023013406"
+        },
+        {
+          "name": "Gladiator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320011174608977"
+        },
+        {
+          "name": "Guardian",
+          "roleName": "Tanks",
+          "limit": 999,
+          "emoteId": "1418371417778552953"
+        },
+        {
+          "name": "Impaler",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320017378115714"
+        },
+        {
+          "name": "Infiltrator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473413414129664"
+        },
+        {
+          "name": "Invocator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473414923812914"
+        },
+        {
+          "name": "Justicar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371419774910484"
+        },
+        {
+          "name": "Liberator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473416073052170"
+        },
+        {
+          "name": "Lunarch",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371422161604748"
+        },
+        {
+          "name": "Oracle",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371426204778527"
+        },
+        {
+          "name": "Outrider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473417360834672"
+        },
+        {
+          "name": "Paladin",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473419210653706"
+        },
+        {
+          "name": "Polaris",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371428209922178"
+        },
+        {
+          "name": "Raider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473454308327425"
+        },
+        {
+          "name": "Ranger",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473455562690592"
+        },
+        {
+          "name": "Ravager",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473457370300456"
+        },
+        {
+          "name": "Scorpion",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473458347704322"
+        },
+        {
+          "name": "Scout",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473460411301938"
+        },
+        {
+          "name": "Scryer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371430168399902"
+        },
+        {
+          "name": "Seeker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473487858700308"
+        },
+        {
+          "name": "Sentinel",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473489519640668"
+        },
+        {
+          "name": "Shadowdancer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320015670902794"
+        },
+        {
+          "name": "Spellblade",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473490685526067"
+        },
+        {
+          "name": "Steelheart",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320018644930630"
+        },
+        {
+          "name": "Templar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473491696484394"
+        },
+        {
+          "name": "Voidlance",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320019907280968"
+        },
+        {
+          "name": "Warden",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473493575401483"
+        }
+      ],
+      "name": "Dps",
+      "limit": 999,
+      "emoteId": "592440132129521664",
+      "type": "primary"
+    },
+    {
+      "specs": [
+        {
+          "name": "Battleweaver",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473373828284476"
+        },
+        {
+          "name": "Berserker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473374969139220"
+        },
+        {
+          "name": "Cavalier",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320014425198602"
+        },
+        {
+          "name": "Crucifix",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371412145602674"
+        },
+        {
+          "name": "Crusader",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473376122441788"
+        },
+        {
+          "name": "Darkblighter",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473377791643658"
+        },
+        {
+          "name": "Disciple",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473378936946709"
+        },
+        {
+          "name": "Enigma",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371414645276764"
+        },
+        {
+          "name": "Eradicator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320012730830858"
+        },
+        {
+          "name": "Fury",
+          "roleName": "Melee",
+          "limit": 999,
+          "emoteId": "1305473380023013406"
+        },
+        {
+          "name": "Gladiator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320011174608977"
+        },
+        {
+          "name": "Guardian",
+          "roleName": "Tanks",
+          "limit": 999,
+          "emoteId": "1418371417778552953"
+        },
+        {
+          "name": "Impaler",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320017378115714"
+        },
+        {
+          "name": "Infiltrator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473413414129664"
+        },
+        {
+          "name": "Invocator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473414923812914"
+        },
+        {
+          "name": "Justicar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371419774910484"
+        },
+        {
+          "name": "Liberator",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473416073052170"
+        },
+        {
+          "name": "Lunarch",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371422161604748"
+        },
+        {
+          "name": "Oracle",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371426204778527"
+        },
+        {
+          "name": "Outrider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473417360834672"
+        },
+        {
+          "name": "Paladin",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473419210653706"
+        },
+        {
+          "name": "Polaris",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371428209922178"
+        },
+        {
+          "name": "Raider",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473454308327425"
+        },
+        {
+          "name": "Ranger",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473455562690592"
+        },
+        {
+          "name": "Ravager",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473457370300456"
+        },
+        {
+          "name": "Scorpion",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473458347704322"
+        },
+        {
+          "name": "Scout",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473460411301938"
+        },
+        {
+          "name": "Scryer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1418371430168399902"
+        },
+        {
+          "name": "Seeker",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473487858700308"
+        },
+        {
+          "name": "Sentinel",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473489519640668"
+        },
+        {
+          "name": "Shadowdancer",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320015670902794"
+        },
+        {
+          "name": "Spellblade",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473490685526067"
+        },
+        {
+          "name": "Steelheart",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320018644930630"
+        },
+        {
+          "name": "Templar",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473491696484394"
+        },
+        {
+          "name": "Voidlance",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1314320019907280968"
+        },
+        {
+          "name": "Warden",
+          "roleName": "Attending",
+          "limit": 999,
+          "emoteId": "1305473493575401483"
+        }
+      ],
+      "name": "Healer",
+      "limit": 999,
+      "emoteId": "898011741735235645",
+      "type": "primary"
+    },
+    {
+      "specs": [],
+      "name": "Late",
+      "limit": 999,
+      "emoteId": "612373443551297689",
+      "type": "default",
+      "effectiveName": "Late"
+    },
+    {
+      "specs": [],
+      "name": "Bench",
+      "limit": 999,
+      "emoteId": "612373441051361353",
+      "type": "default",
+      "effectiveName": "Bench"
+    },
+    {
+      "specs": [],
+      "name": "Tentative",
+      "limit": 999,
+      "emoteId": "676284492754976788",
+      "type": "default",
+      "effectiveName": "Tentative"
+    },
+    {
+      "specs": [],
+      "name": "Absence",
+      "limit": 999,
+      "emoteId": "612343589070045200",
+      "type": "default",
+      "effectiveName": "Absence"
+    }
+  ],
+  "roles": [],
+  "description": "Guilde vs Guilde",
+  "channelType": "text",
+  "title": "Pierre de bénédiction",
+  "templateId": "t&l2",
+  "serverId": "979650570849759282",
+  "leaderId": "883046854336598066",
+  "lastUpdated": 1770064713,
+  "displayTitle": "Pierre de bénédiction",
+  "closingTime": 1770061500,
+  "leaderName": "DarkPampa",
+  "advancedSettings": {
+    "temp_voicechannel": "false",
+    "twelve_format": false,
+    "limit_per_user": 1,
+    "tentative_emote": "676284492754976788",
+    "event_type": "interaction",
+    "deletion": "false",
+    "mention_mode": false,
+    "text_2": "default",
+    "bench_overflow": true,
+    "disable_reason": false,
+    "text_1": "default",
+    "temp_time": 24,
+    "show_classes": false,
+    "time2_emote": "593930235658108939",
+    "preserve_order": "false",
+    "force_reminders": "false",
+    "tp_deletion": "1",
+    "leader_emote": "1124529969926779050",
+    "hide_comp": false,
+    "mentions": "none",
+    "show_info": true,
+    "late_emote": "612373443551297689",
+    "lower_limit": 0,
+    "opt_out": "none",
+    "info_variant": "short",
+    "pin_message": false,
+    "create_thread": "false",
+    "vacuum": false,
+    "poll_add_req": "none",
+    "deadline": "0",
+    "unregister_emote": "579506704518217739",
+    "horizontal_mode": false,
+    "show_countdown": true,
+    "dkp_include": "signed",
+    "date2_emote": "593930359985405983",
+    "reminder": "false",
+    "specs_per_signup": 1,
+    "font_style": "3",
+    "temp_role": "false",
+    "allowed_roles": "none",
+    "queue_bench": false,
+    "dkp_amount": 0,
+    "specreset_emote": "761163891144130560",
+    "12h_format": false,
+    "disable_archiving": false,
+    "absence_emote": "612343589070045200",
+    "notes_enabled": true,
+    "date1_emote": "1124529967611523272",
+    "apply_unregister": false,
+    "show_content": true,
+    "countdown2_emote": "858794526176444467",
+    "poll_order": "sorted",
+    "limit": 9999,
+    "signups1_emote": "1124529971428339752",
+    "show_emotes": true,
+    "show_extra_specs": true,
+    "banned_roles": "none",
+    "image": "none",
+    "thumbnail": "none",
+    "show_footer": true,
+    "apply_specreset": true,
+    "allow_duplicate": false,
+    "forum_tags": "Event",
+    "alt_names": false,
+    "tp_profile": "none",
+    "show_title": true,
+    "create_discordevent": true,
+    "show_counter": true,
+    "show_banned": false,
+    "thread_logging": false,
+    "bench_emote": "612373441051361353",
+    "color": "none",
+    "use_nicknames": true,
+    "show_on_overview": true,
+    "voice_channel": "none",
+    "duration": 0,
+    "spec_saving": true,
+    "time1_emote": "1124529972883767398",
+    "defaults_pre_req": true,
+    "poll_add": false,
+    "mention_leader": false,
+    "bold_all": true,
+    "custom": "none",
+    "show_leader": true,
+    "signups2_emote": "593930418932285440",
+    "dkp_delay": "24",
+    "show_roles": true,
+    "date_variant": "local",
+    "response": "none",
+    "embed_profile": "false",
+    "lock_at_limit": true,
+    "countdown1_emote": "1124530049329139772",
+    "show_numbering": true,
+    "show_allowed": false,
+    "delete_thread": false,
+    "tr_include": "signed",
+    "attendance": "true"
+  },
+  "startTime": 1770061500,
+  "channelName": "☑️-lundi",
+  "id": "1467642512532308088",
+  "time": "20:45",
+  "endTime": 1770061500,
+  "announcements": [],
+  "channelId": "1398035525159616553"
+}

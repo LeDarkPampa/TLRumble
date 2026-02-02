@@ -19,7 +19,7 @@
 
 - **Script d’appel API** : `scripts/call-raid-helper-api.js`
   - Charge `.env` (RAID_HELPER_API_KEY, RAID_HELPER_GUILD_ID).
-  - Appel : `GET https://api.raid-helper.dev/v1/events/{GUILD_ID}` avec header `Authorization: <clé API>` (sans "Bearer", selon la doc Raid-Helper).
+  - Appel : `GET https://raid-helper.dev/api/v3/servers/{GUILD_ID}/events` avec header `Authorization: <clé API>` (sans "Bearer", selon la doc Raid-Helper).
   - Essai d’abord avec `fetch`, puis repli sur le module `https` natif.
   - Gère les réponses vides / « aucune donnée » et enregistre la réponse dans `docs/api-response-sample.json`.
 - **Config** : `.env.example` avec RAID_HELPER_API_KEY (obtenue via `/apikey` sur le serveur), RAID_HELPER_GUILD_ID, plus variables Discord / timezone pour la suite.
@@ -31,7 +31,7 @@
 ## 3. Situation actuelle (connexion)
 
 - **Depuis un certain réseau** (pas chez toi) : le script Node a **réussi** à appeler l’API et a reçu une réponse **« Aucune donnée disponible »** (pas d’événements pour ce serveur — normal si pas d’events Raid-Helper).
-- **Depuis un autre endroit** (où tu as fait le curl) : **connexion TLS réinitialisée** (curl : `Recv failure: Connection was reset`, `schannel: failed to receive handshake, SSL/TLS connection failed`). Donc blocage **réseau / TLS** entre ta machine et `api.raid-helper.dev` (pare-feu, FAI, antivirus, ou politique côté serveur).
+- **Depuis un autre endroit** (où tu as fait le curl) : **connexion TLS réinitialisée** (curl : `Recv failure: Connection was reset`, `schannel: failed to receive handshake, SSL/TLS connection failed`). Donc blocage **réseau / TLS** entre ta machine et `raid-helper.dev` (pare-feu, FAI, antivirus, ou politique côté serveur).
 - **Tu as dit** que tu retesteras **chez toi** (connexion perso).
 
 ---
@@ -46,7 +46,7 @@
    ```
 2. **Si besoin, curl** (remplacer `TA_CLE` par ta clé) :
    ```bash
-   curl -v -H "Authorization: TA_CLE" "https://api.raid-helper.dev/v1/events/979650570849759282"
+   curl -v -H "Authorization: TA_CLE" "https://raid-helper.dev/api/v3/servers/979650570849759282/events"
    ```
 
 ### 4.2 Si ça marche chez toi
@@ -57,7 +57,7 @@
 ### 4.3 Si ça ne marche pas chez toi (toujours TLS reset)
 
 - Options : tester en 4G, désactiver temporairement l’inspection HTTPS de l’antivirus, contacter Raid-Helper pour savoir s’ils bloquent certaines régions/clients.
-- **Pour le récap en prod** : faire tourner le script sur un **VPS** (ou NAS ailleurs) qui arrive à joindre `api.raid-helper.dev`. Le code et la config restent les mêmes.
+- **Pour le récap en prod** : faire tourner le script sur un **VPS** (ou NAS ailleurs) qui arrive à joindre `raid-helper.dev`. Le code et la config restent les mêmes.
 
 ---
 
