@@ -19,7 +19,7 @@ Ce projet est **totalement indépendant de TL Rumble** : autre contexte (guilde 
 | Sujet | Décision |
 |-------|-----------|
 | **Membres concernés** | **Tous les membres du Discord ayant un certain rôle** (ex. « Raider »). Liste récupérée via l’API Discord. Ceux qui n’apparaissent jamais dans Raid-Helper sont inclus : ils comptent comme « 0 réponse sur X raids ». |
-| **Périmètre temporel** | **Toute la semaine (lundi → dimanche).** Tous les raids sont postés le dimanche pour la semaine à venir ; on prend **tous les raids dont la date de début** tombe entre **lundi 0h** et **dimanche 23h59** de la semaine en cours (heure locale). Le **dénominateur** (nombre total de raids) est donc **fixe** pour toute la semaine.’ **aujourd’hui |
+| **Périmètre temporel** | **Toute la semaine (lundi → dimanche).** Tous les raids sont postés le dimanche pour la semaine à venir ; on prend **tous les raids dont la date de début** tombe entre **lundi 0h** et **dimanche 23h59** de la semaine en cours (heure locale). Le **dénominateur** (nombre total de raids) est donc **fixe** pour toute la semaine. |
 | **Comportement par jour** | Chaque jour à 23h : pour chaque membre, on compte **combien de ces raids de la semaine** il a **déjà répondu** (à la date du récap). Taux = (réponses à ce jour) / (total raids de la semaine) × 100. **Lundi 23h** → ex. 2/15 (13 %). **Dimanche 23h** → ex. 12/15 (80 %). Même base (ex. 15 raids) chaque jour ; seul le numérateur évolue. |
 | **Deux messages par jour** | À 23h, le bot envoie **deux messages distincts** : (1) **Taux de réponse** au Raid-Helper — tout type de réponse compte (présent, absent, en retard, etc.) ; (2) **Taux de présence** — uniquement les membres vraiment inscrits / présents (ex. status « accepted » ou équivalent, à définir selon l’API). |
 | **Tranches d’affichage** | **Vert** ≥ 80 % · **Jaune** ≥ 50 % · **Orange** ≥ 20 % · **Rouge** &lt; 20 %. Chaque message (réponse et présence) affiche les membres répartis dans ces 4 tranches. |
@@ -39,8 +39,9 @@ Ce projet est **totalement indépendant de TL Rumble** : autre contexte (guilde 
 
 3. **Analyser deux indicateurs par membre**  
    Pour chaque membre (avec le rôle) et pour **chaque raid de la semaine** : on regarde s’il a répondu / s’il est présent **à la date du récap** (les signups Raid-Helper sont à jour en temps réel).  
-   - **Taux de réponse :** compte **toute réponse** (présent, absent, en retard, tentative, declined, etc.). Nombre de raids de la semaine où le membre a répondu (à ce jour) / **nombre total de raids de la semaine** → %.  
-   - **Taux de présence :** compte **uniquement les inscriptions « vraiment présentes »** (ex. status accepted). Nombre de raids de la semaine où le membre est inscrit comme présent (à ce jour) / **nombre total de raids de la semaine** → %.
+   - **Taux de réponse :** base = **toute la semaine**. Pour chaque raid de la semaine, on regarde si le membre a répondu (à la date du récap). Toute réponse compte. Taux = raids où il a répondu / **nombre total de raids de la semaine** → %.  
+   - **Taux de présence effective :** base = **uniquement les raids déjà passés** (date de début ≤ fin du jour courant, récap à 23h). Pour chaque raid **déjà passé**, on regarde si le membre est inscrit **présent** (ex. status accepted). Taux = raids passés où il est présent / **nombre de raids passés** → %.  
+   Les signups Raid-Helper sont à jour en temps réel.
 
 4. **Générer deux messages récap en embed**  
    - **Message 1 — Taux de réponse :** un **embed** Discord avec titre, description (résumé), puis 4 champs (Vert ≥ 80 % / Jaune ≥ 50 % / Orange ≥ 20 % / Rouge &lt; 20 %) listant les pseudos par tranche.  
@@ -156,4 +157,4 @@ Voir **`docs/PLAN_ACTION.md`** pour le détail. En résumé :
 
 ---
 
-*Document mis à jour : récap **quotidien** à 23h, base **toute la semaine** (dénominateur fixe = tous les raids lundi→dimanche ; numérateur = réponses à ce jour).*
+*Document mis à jour : récap **quotidien** à 23h. **Taux de réponse** : base = toute la semaine (dénominateur fixe ; numérateur = réponses à ce jour). **Taux de présence effective** : base = uniquement les raids déjà passés (jour courant 23h inclus).*
