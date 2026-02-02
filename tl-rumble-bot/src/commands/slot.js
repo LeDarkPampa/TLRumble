@@ -71,7 +71,14 @@ export default {
 
       const [, y, m, d] = matchDate;
       const [, h, min] = matchTime;
-      const datetimeUtc = new Date(Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(min, 10))).toISOString();
+      // L'utilisateur saisit l'heure dans le fuseau du serveur (ex. Europe/Paris), pas en UTC.
+      const hour = parseInt(h, 10);
+      const minute = parseInt(min, 10);
+      const tempUtc = new Date(Date.UTC(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10), hour, minute));
+      const displayedHour = parseInt(tempUtc.toLocaleString('en-US', { timeZone: config.serverTimezone, hour: 'numeric', hour12: false }), 10);
+      const displayedMinute = parseInt(tempUtc.toLocaleString('en-US', { timeZone: config.serverTimezone, minute: 'numeric' }), 10);
+      const diffMs = ((hour - displayedHour) * 60 + (minute - displayedMinute)) * 60 * 1000;
+      const datetimeUtc = new Date(tempUtc.getTime() + diffMs).toISOString();
 
       const slot = createSlot(datetimeUtc, maxGroups);
       if (!slot) {

@@ -1,5 +1,6 @@
 import { config } from '../config.js';
 import { getSlotsForReminder, markReminderSent } from '../services/slotService.js';
+import { postTeamsForSlot } from '../services/teamService.js';
 
 function formatSlotDatetime(isoUtc) {
   try {
@@ -24,6 +25,8 @@ async function runReminders(client) {
         const channel = await client.channels.fetch(config.wargameScheduleChannelId).catch(() => null);
         if (channel) await channel.send(text).catch(() => {});
       }
+      // Création automatique des équipes (répartition des groupes inscrits)
+      await postTeamsForSlot(client, slot);
       markReminderSent(slot.id);
     } catch (err) {
       console.error('Erreur rappel slot', slot.id, err);

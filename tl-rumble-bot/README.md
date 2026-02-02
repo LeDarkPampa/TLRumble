@@ -2,6 +2,16 @@
 
 Bot Discord pour le serveur **TL Rumble** (Throne and Liberty) : gestion des créneaux wargame et inscriptions par groupes de 6 joueurs.
 
+---
+
+## Présentation du projet
+
+**TL Rumble** a pour but de proposer des **wargames accessibles à tous** : joueurs occasionnels, petites guildes et grandes communautés. Pas besoin d’être une méga-guild pour participer : on s’inscrit par **groupes de 6**, les créneaux sont ouverts à tous, et les équipes sont formées à partir des inscriptions. L’objectif est de **jouer ensemble** dans un esprit chill, **sans guerres d’égo** ni pression — juste des wargames réguliers, bien cadrés par le bot (créneaux, rappels, répartition des équipes).
+
+Que tu sois en petite guilde ou en solo avec des potes, tu peux t’inscrire sur un créneau, retrouver d’autres joueurs TL et enchaîner les parties. Bienvenue à bord.
+
+---
+
 ## Prérequis
 
 - Node.js 18+
