@@ -31,7 +31,29 @@ export const config = {
     yellow: 50,
     orange: 20,
   },
+  /** MP de relance : membres < 20 % réponse, uniquement à partir du mardi soir */
+  relance: {
+    enabled: process.env.RELANCE_MP_ENABLED === 'true',
+    /** Jour minimum (0 = dimanche, 1 = lundi, 2 = mardi). Mardi = 2 → MPs à partir du mardi 23h */
+    dayMin: parseInt(process.env.RELANCE_DAY_MIN || '2', 10) || 2,
+    /** Message avec {displayName} et {responsePercent} */
+    messageTemplate:
+      process.env.RELANCE_MP_MESSAGE ||
+      "Tu n'as répondu qu'à **{responsePercent} %** des raids Raid-Helper cette semaine. Pense à mettre à jour tes réponses !",
+    /** IDs Discord des utilisateurs "absents" (prévenus) : ils ne reçoivent pas de MP de relance. Séparés par des virgules. */
+    absentUserIds: parseAbsentUserIds(process.env.RELANCE_MP_ABSENT_IDS || ''),
+    /** Fichier où sont enregistrés les utilisateurs n'ayant pas pu recevoir le MP (MP désactivés, etc.). Chemin relatif à la racine du projet. */
+    errorsFile: process.env.RELANCE_MP_ERRORS_FILE || 'data/relance-mp-errors.json',
+  },
 };
+
+function parseAbsentUserIds(raw) {
+  if (!raw || typeof raw !== 'string') return [];
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 export function validateConfig() {
   const errors = [];

@@ -92,6 +92,57 @@ export async function sendRecapEmbeds(embeds, options = {}) {
 }
 
 /**
+ * Envoie un MP (message privé) à un utilisateur Discord.
+ * Gère les erreurs (utilisateur qui refuse les MP des membres du serveur).
+ * @param {Client} client - Client Discord connecté
+ * @param {string} userId - ID Discord de l'utilisateur
+ * @param {string} content - Contenu du message
+ * @returns {Promise<{ ok: boolean, error?: string }>}
+ */
+export async function sendDmToUser(client, userId, content) {
+  try {
+    const user = await client.users.fetch(userId);
+    if (!user) return { ok: false, error: 'User not found' };
+    await user.send({ content });
+    return { ok: true };
+  } catch (err) {
+    const msg = err?.message || String(err);
+    return { ok: false, error: msg };
+  }
+}
+
+/**
+ * Envoie un MP de relance à chaque membre de la liste (taux de réponse < seuil).
+ * Petit délai entre chaque envoi pour limiter le rate limit.
+ * @param {Client} client - Client Discord connecté
+ * @param {Array<{ id: string, displayName: string, responsePercent: number }>} members - Membres à relancer
+ * @param {string} messageTemplate - Message avec {displayName} et {responsePercent} remplacés
+ * @param {number} delayMs - Délai entre chaque MP (défaut 1500 ms)
+ * @returns {Promise<{ sent: number, failed: number, errors: Array<{ id: string, displayName: string, error: string }> }>}
+ */
+export async function sendRelanceDms(client, members, messageTemplate, delayMs = 1500) {
+  let sent = 0;
+  let failed = 0;
+  const errors = [];
+
+  for (const m of members) {
+    const content = messageTemplate
+      .replace(/\{displayName\}/g, m.displayName)
+      .replace(/\{responsePercent\}/g, String(m.responsePercent));
+    const result = await sendDmToUser(client, m.id, content);
+    if (result.ok) {
+      sent += 1;
+    } else {
+      failed += 1;
+      errors.push({ id: m.id, displayName: m.displayName || m.id, error: result.error || 'Unknown' });
+    }
+    if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+  }
+
+  return { sent, failed, errors };
+}
+
+/**
  * Connexion du bot, exécution d'une fonction, puis déconnexion.
  * Attend l'événement "ready" avant d'exécuter fn.
  * @param {(client: Client) => Promise<void>} fn

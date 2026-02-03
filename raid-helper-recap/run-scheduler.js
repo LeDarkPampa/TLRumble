@@ -6,10 +6,13 @@
  * Définir TZ=Europe/Paris (ou TIMEZONE). Enregistrer la commande une fois : node scripts/deploy-recap-command.js
  */
 
+import path from 'path';
+import { EmbedBuilder } from 'discord.js';
 import { config, validateConfig } from './src/config.js';
-import { createClient, getMembersWithRole, sendRecapEmbeds } from './src/discord.js';
+import { createClient, getMembersWithRole, sendRecapEmbeds, sendRelanceDms } from './src/discord.js';
+import { appendRelanceErrors, getUniqueMpRefuses } from './src/relanceLogger.js';
 import { getEventsForWeekWithSignups } from './src/raidHelper.js';
-import { buildRecapEmbeds } from './src/recap.js';
+import { buildRecapEmbeds, getMembersBelowResponseThreshold } from './src/recap.js';
 
 const RECAP_HOUR = 23;
 const CHECK_INTERVAL_MS = 60 * 1000;
@@ -32,6 +35,11 @@ function todayKey() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
+function shouldSendRelanceDms() {
+  const now = new Date();
+  return now.getDay() >= config.relance.dayMin;
+}
+
 async function runRecapOnce(client) {
   const [members, events] = await Promise.all([
     getMembersWithRole(client),
@@ -47,6 +55,25 @@ async function runRecapOnce(client) {
   const embeds = buildRecapEmbeds(members, events, { weekLabel });
   await sendRecapEmbeds(embeds, { client });
   console.log(`[recap] Envoyé : ${members.length} membre(s), ${events.length} raid(s) cette semaine.`);
+
+  if (config.relance.enabled && shouldSendRelanceDms()) {
+    const absentIds = new Set(config.relance.absentUserIds.map((id) => String(id).trim()));
+    let below = getMembersBelowResponseThreshold(members, events, config.tiers.orange);
+    below = below.filter((m) => !absentIds.has(String(m.id).trim()));
+    if (below.length > 0) {
+      const { sent, failed, errors } = await sendRelanceDms(
+        client,
+        below,
+        config.relance.messageTemplate,
+        1500
+      );
+      console.log(`[recap] Relance MP : ${sent} envoyé(s), ${failed} échec(s).`);
+      if (errors.length > 0) {
+        appendRelanceErrors(config.relance.errorsFile, errors);
+        console.log(`[recap] MP non reçus enregistrés dans : ${path.resolve(config.relance.errorsFile)}`);
+      }
+    }
+  }
 }
 
 function shouldRunNow() {
@@ -68,25 +95,77 @@ async function tick(client) {
 }
 
 async function handleRecapCommand(interaction, client) {
-  if (!interaction.isChatInputCommand() || interaction.commandName !== 'recap') return;
-  try {
-    await interaction.deferReply({ ephemeral: false });
-    const [members, events] = await Promise.all([
-      getMembersWithRole(client),
-      getEventsForWeekWithSignups(),
-    ]);
-    const weekLabel = getWeekLabel();
-    const embeds = buildRecapEmbeds(members, events, { weekLabel });
-    await interaction.editReply({
-      content: null,
-      embeds: embeds.map((e) => e.toJSON()),
-    });
-  } catch (err) {
-    console.error('[recap] Erreur commande /recap:', err.message);
-    await interaction.editReply({
-      content: `Erreur : ${err.message}`,
-      embeds: [],
-    }).catch(() => {});
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'recap') {
+    try {
+      await interaction.deferReply({ ephemeral: false });
+      const [members, events] = await Promise.all([
+        getMembersWithRole(client),
+        getEventsForWeekWithSignups(),
+      ]);
+      const weekLabel = getWeekLabel();
+      const embeds = buildRecapEmbeds(members, events, { weekLabel });
+      await interaction.editReply({
+        content: null,
+        embeds: embeds.map((e) => e.toJSON()),
+      });
+    } catch (err) {
+      console.error('[recap] Erreur commande /recap:', err.message);
+      await interaction.editReply({
+        content: `Erreur : ${err.message}`,
+        embeds: [],
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  if (interaction.commandName === 'mp-refuses') {
+    try {
+      await interaction.deferReply({ ephemeral: true });
+      const list = getUniqueMpRefuses(config.relance.errorsFile);
+      if (list.length === 0) {
+        await interaction.editReply({
+          content: "Aucun utilisateur enregistré comme n'ayant pas pu recevoir le MP de relance.\n(Fichier vide ou inexistant.)",
+        });
+        return;
+      }
+      const lines = list.map(
+        (u) => `• **${u.displayName}** (\`${u.id}\`) — ${u.count} fois — dernière : ${u.lastError.slice(0, 80)}${u.lastError.length > 80 ? '…' : ''}`
+      );
+      const valueMax = 1024;
+      let chunk = '';
+      const parts = [];
+      for (const line of lines) {
+        if (chunk.length + line.length + 1 > valueMax && chunk) {
+          parts.push(chunk.trim());
+          chunk = '';
+        }
+        chunk += line + '\n';
+      }
+      if (chunk) parts.push(chunk.trim());
+
+      const embed = new EmbedBuilder()
+        .setTitle("Utilisateurs n'ayant pas pu recevoir le MP de relance")
+        .setDescription(`**${list.length}** utilisateur(s) avec MP désactivés ou erreur d'envoi (données dédupliquées).`)
+        .setColor(0xed4245)
+        .setTimestamp();
+      parts.forEach((p, i) => {
+        embed.addFields({
+          name: i === 0 ? 'Liste (id, nb fois, dernière erreur)' : '… (suite)',
+          value: p || '—',
+          inline: false,
+        });
+      });
+      await interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error('[recap] Erreur commande /mp-refuses:', err.message);
+      await interaction.editReply({
+        content: `Erreur : ${err.message}`,
+        embeds: [],
+      }).catch(() => {});
+    }
+    return;
   }
 }
 

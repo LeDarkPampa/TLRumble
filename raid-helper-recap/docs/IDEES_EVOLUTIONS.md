@@ -4,6 +4,38 @@ Idées envisageables pour plus tard, sans les mettre en place immédiatement.
 
 ---
 
+## MP de relance (personnes &lt; 20 % de réponse)
+
+**Idée :** Le bot envoie un **MP (message privé)** aux membres du rôle qui ont répondu à **moins de 20 %** des raids Raid-Helper de la semaine, pour les inciter à mettre à jour leurs réponses. **Uniquement à partir du mardi soir** (pas de MP le lundi 23h, mais à partir du mardi 23h et les jours suivants).
+
+### État actuel du projet
+
+- **Ce qui existe :** Le récap calcule déjà les taux par membre et répartit en tranches (Vert / Jaune / Orange / Rouge). Les membres &lt; 20 % en **taux de réponse** sont identifiés dans `recap.js` (liste `red` pour l’embed réponse), mais cette liste n’est **pas exposée** (pas d’IDs retournés) et il n’y a **aucun envoi de MP** dans le code.
+- **Ce qui manque :**
+  1. **Exposer la liste des membres &lt; 20 % réponse** avec leur **ID Discord** (pour pouvoir leur envoyer un MP). Aujourd’hui on n’a que les `displayName` dans l’embed.
+  2. **Fonction d’envoi de MP** dans `discord.js` : `client.users.fetch(userId)` puis `user.send(message)`. Gérer les erreurs (utilisateur qui refuse les MP des membres du serveur).
+  3. **Condition « à partir du mardi soir »** : au moment du récap (ex. 23h), ne lancer l’envoi des MP que si le jour est **mardi ou après** (ex. `getDay() >= 2` en JS, avec 0 = dimanche, 1 = lundi, 2 = mardi). Le lundi 23h on n’envoie pas de MP ; le mardi 23h et suivants, oui.
+
+### Points techniques
+
+| Sujet | Détail |
+|-------|--------|
+| **Critère** | Taux de **réponse** &lt; 20 % (tranche Rouge). Même base que le récap : toute la semaine, toute réponse compte. |
+| **Horaire** | Même passage que le récap (ex. 23h). Ne envoyer les MP que si **jour ≥ mardi** (mardi 23h, mercredi 23h, …, dimanche 23h). |
+| **MP Discord** | `GuildMember.user.send(content)` ou `client.users.fetch(userId).then(u => u.send(content))`. Certains utilisateurs ont « Fermer les MP des membres du serveur » → capturer l’erreur et logger sans crasher. |
+| **Message** | Court texte configurable (ex. « Tu n’as répondu qu’à X % des raids Raid-Helper cette semaine. Pense à mettre à jour tes réponses ! »). |
+| **Absents** | `RELANCE_MP_ABSENT_IDS` : IDs Discord (virgules) ; ces utilisateurs ne reçoivent pas de MP. |
+| **MP non reçus** | Enregistrés dans `RELANCE_MP_ERRORS_FILE` (ex. `data/relance-mp-errors.json`) : date + id, displayName, error. |
+| **Config** | `RELANCE_MP_ENABLED`, `RELANCE_DAY_MIN`, message template, `RELANCE_MP_ABSENT_IDS`, `RELANCE_MP_ERRORS_FILE`. |
+
+### À faire pour l’implémenter
+
+1. **recap.js** : Exposer une fonction du type `getMembersBelowResponseThreshold(members, events, threshold)` qui retourne les membres avec **id** + displayName + taux (pour le message). Ou faire retourner par `buildRecapEmbeds` (ou une fonction dédiée) la liste des `{ id, displayName, responsePercent }` pour la tranche rouge.
+2. **discord.js** : Ajouter `sendDmToUser(client, userId, content)` avec try/catch ; optionnellement `sendDmToUsers(client, userIds, content)` en boucle avec un petit délai entre chaque pour éviter le rate limit.
+3. **run-recap.js / run-scheduler.js** : Après l’envoi des embeds, si `RELANCE_MP_ENABLED` et jour ≥ mardi : récupérer la liste des membres &lt; 20 % réponse, pour chaque envoyer le MP (message avec X %), logger les succès/échecs.
+
+---
+
 ## Mise à jour des rôles Discord selon le taux d’activité
 
 **Idée :** En plus des messages récap en embed, un **bot Discord** mettrait à jour le **rôle** des membres de la guilde en fonction d’une **tranche unique** (Vert / Jaune / Orange / Rouge), avec une **couleur** par tranche. La couleur du pseudo reflète ainsi le niveau d’activité.

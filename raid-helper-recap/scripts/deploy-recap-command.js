@@ -16,17 +16,23 @@ if (!botToken || !clientId || !guildId) {
 }
 
 const rest = new REST().setToken(botToken);
-const command = {
-  name: 'recap',
-  description: 'Générer le récap Raid-Helper (taux de réponse + présence) sur demande',
-};
+const commands = [
+  {
+    name: 'recap',
+    description: 'Générer le récap Raid-Helper (taux de réponse + présence) sur demande',
+  },
+  {
+    name: 'mp-refuses',
+    description: 'Lister les utilisateurs n\'ayant pas pu recevoir le MP de relance (MP désactivés)',
+  },
+];
 
 try {
   await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
-    body: [command],
+    body: commands,
   });
-  console.log('Commande /recap enregistrée sur le serveur (guild)', guildId);
+  console.log('Commandes /recap et /mp-refuses enregistrées sur le serveur (guild)', guildId);
 } catch (e) {
-  console.error('Erreur enregistrement commande:', e.message);
+  console.error('Erreur enregistrement commandes:', e.message);
   process.exit(1);
 }

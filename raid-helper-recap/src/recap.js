@@ -185,6 +185,35 @@ export function buildRecapEmbeds(members, events, options = {}) {
   return [embedResponse, embedPresence];
 }
 
+/**
+ * Retourne les membres dont le taux de réponse est strictement inférieur au seuil (ex. 20 %).
+ * Utilisé pour les MPs de relance (uniquement à partir du mardi soir).
+ * @param {Array<{ id: string, displayName: string }>} members
+ * @param {Array<{ id: string, startTime: number, signups?: Array<Record<string, unknown>> }>} events
+ * @param {number} thresholdPercent - Seuil en % (ex. 20 pour < 20 %)
+ * @returns {Array<{ id: string, displayName: string, responsePercent: number }>}
+ */
+export function getMembersBelowResponseThreshold(members, events, thresholdPercent = 20) {
+  const now = new Date();
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const endOfTodayTs = Math.floor(endOfToday.getTime() / 1000);
+  const { byMember, totalEvents } = computeStats(members, events, endOfTodayTs);
+  if (totalEvents === 0) return [];
+
+  const below = [];
+  for (const row of byMember) {
+    const responsePercent = Math.round((row.responseCount / totalEvents) * 100);
+    if (responsePercent < thresholdPercent) {
+      below.push({
+        id: row.id,
+        displayName: row.displayName,
+        responsePercent,
+      });
+    }
+  }
+  return below;
+}
+
 function addTierFieldsToEmbed(embed, green, yellow, orange, red) {
   const addField = (name, list) => {
     const chunks = chunkNames(list);

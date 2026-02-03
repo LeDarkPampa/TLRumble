@@ -1,6 +1,9 @@
 # Config locale (ne pas commiter)
 .env
 
+# Données locales (relance MP : MP non reçus)
+data/
+
 # Node
 node_modules/
 

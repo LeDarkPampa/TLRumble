@@ -6,10 +6,12 @@
  * Flux : config → Discord (membres avec le rôle) → Raid-Helper (événements de la semaine + signups) → recap (embeds) → envoi Discord.
  */
 
+import path from 'path';
 import { config, validateConfig } from './src/config.js';
-import { getMembersWithRole, sendRecapEmbeds, withDiscordClient } from './src/discord.js';
+import { getMembersWithRole, sendRecapEmbeds, sendRelanceDms, withDiscordClient } from './src/discord.js';
+import { appendRelanceErrors } from './src/relanceLogger.js';
 import { getEventsForWeekWithSignups } from './src/raidHelper.js';
-import { buildRecapEmbeds } from './src/recap.js';
+import { buildRecapEmbeds, getMembersBelowResponseThreshold } from './src/recap.js';
 
 async function run() {
   validateConfig();
@@ -32,7 +34,41 @@ async function run() {
     await sendRecapEmbeds(embeds, { client });
 
     console.log(`Récap envoyé : ${members.length} membre(s), ${events.length} raid(s) cette semaine.`);
+
+    // MP de relance : membres < 20 % réponse, uniquement à partir du mardi soir (absents exclus)
+    if (config.relance.enabled && shouldSendRelanceDms()) {
+      const threshold = config.tiers.orange;
+      const absentIds = new Set(config.relance.absentUserIds.map((id) => String(id).trim()));
+      let below = getMembersBelowResponseThreshold(members, events, threshold);
+      below = below.filter((m) => !absentIds.has(String(m.id).trim()));
+      if (below.length > 0) {
+        const { sent, failed, errors } = await sendRelanceDms(
+          client,
+          below,
+          config.relance.messageTemplate,
+          1500
+        );
+        console.log(`Relance MP : ${sent} envoyé(s), ${failed} échec(s).`);
+        if (errors.length > 0) {
+          appendRelanceErrors(config.relance.errorsFile, errors);
+          const errorsPath = path.resolve(config.relance.errorsFile);
+          console.log(`  MP non reçus enregistrés dans : ${errorsPath}`);
+          if (errors.length <= 5) {
+            errors.forEach((e) => console.warn(`  - ${e.displayName} (${e.id}): ${e.error}`));
+          }
+        }
+      } else {
+        console.log('Relance MP : aucun membre < 20 % réponse à relancer (absents exclus).');
+      }
+    }
   });
+}
+
+/** Mardi = 2 en JS getDay() (0 = dimanche). MPs uniquement à partir du mardi soir (23h). */
+function shouldSendRelanceDms() {
+  const now = new Date();
+  const day = now.getDay();
+  return day >= config.relance.dayMin;
 }
 
 function getWeekLabel() {
