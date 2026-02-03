@@ -158,8 +158,8 @@ export default {
     const command = interaction.client.commands.get(interaction.commandName);
     if (!command) return;
 
-    // /servers et /listen-messages : uniquement sur le serveur principal (MAIN_GUILD_ID)
-    const mainGuildOnlyCommands = ['servers', 'listen-messages'];
+    // /servers et /listen-inscriptions : uniquement sur le serveur principal (MAIN_GUILD_ID)
+    const mainGuildOnlyCommands = ['servers', 'listen-inscriptions'];
     if (config.mainGuildId && mainGuildOnlyCommands.includes(interaction.commandName)) {
       if (interaction.guildId !== config.mainGuildId) {
         return interaction.reply({

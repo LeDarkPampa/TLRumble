@@ -26,7 +26,7 @@ Analyse à jour du contexte, de l’état actuel et du reste à faire. Référen
 | Équipes | Génération et envoi des équipes (répartition 1ère moitié / 2ᵉ moitié) au moment du rappel | ✅ Implémenté (`teamService`) |
 | Multi-guildes | Feed (annonces sur serveurs fils), inscription depuis serveur fils (vérif rôle + membres sur TL Rumble) | ✅ Implémenté |
 | Config | Canal schedule/feed par `/schedule-setup` et `/tl-feed-setup` | ✅ Implémenté |
-| Optionnel | Écoute des messages (`/listen-messages`), liste des serveurs (`/servers`) | ✅ Implémenté |
+| Optionnel | Écoute des inscriptions (`/listen-inscriptions`), liste des serveurs (`/servers`) | ✅ Implémenté |
 
 ### 1.3 Stack et déploiement
 
@@ -46,14 +46,14 @@ tl-rumble-bot/
 ├── src/
 │   ├── index.js                 # Entrée : config, db, commandes/events, login, closeDb sur SIGINT/SIGTERM
 │   ├── config.js                # .env : token, clientId, rôles, timezone, db, mainGuildId, wargameScheduleChannelId
-│   ├── deploy-commands.js       # Slash commands (globales + guild pour listen-messages, servers)
+│   ├── deploy-commands.js       # Slash commands (globales + guild pour listen-inscriptions, servers)
 │   ├── commands/
 │   │   ├── ping.js
 │   │   ├── slot.js              # create | list | info | close | delete
 │   │   ├── signup.js            # slot + 6 joueurs (autocomplete slot)
 │   │   ├── tl-feed-setup.js     # Canal annonces (serveurs ≠ principal)
 │   │   ├── schedule-setup.js    # Principal = canal schedule ; autres = canal feed
-│   │   ├── listen-messages.js   # Enable/disable/status, enable-for-server, disable-for-server
+│   │   ├── listen-inscriptions.js   # enable-for-server, disable-for-server (avec ID serveur)
 │   │   └── servers.js           # Liste serveurs + salons (Moderator, principal uniquement)
 │   ├── services/
 │   │   ├── slotService.js       # createSlot, listSlots, getSlotById, closeSlot, deleteSlot, getRegistrationsForSlot, getSlotsForReminder, markReminderSent
@@ -71,7 +71,7 @@ tl-rumble-bot/
 │   │   └── eventHandler.js
 │   └── events/
 │       ├── ready.js             # Rappels 10 min (getSlotsForReminder) + postTeamsForSlot ; utilise getScheduleChannelId
-│       ├── interactionCreate.js # Boutons signup/view_slot, modal signup, garde main-guild pour servers/listen-messages
+│       ├── interactionCreate.js # Boutons signup/view_slot, modal signup, garde main-guild pour servers/listen-inscriptions
 │       └── messageCreate.js     # Enregistrement messages si écoute activée
 ├── docker-compose.yml, Dockerfile, .env.example
 ├── README.md, CONTEXT_ARCHITECTURE.md, RESTE_A_FAIRE.md

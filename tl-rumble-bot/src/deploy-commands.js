@@ -12,7 +12,7 @@ import { loadCommands } from './handlers/commandHandler.js';
 validateConfig();
 
 /** Commandes visibles uniquement sur le serveur principal (MAIN_GUILD_ID). */
-const MAIN_GUILD_ONLY_COMMANDS = ['listen-messages', 'servers'];
+const MAIN_GUILD_ONLY_COMMANDS = ['listen-inscriptions', 'servers'];
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
@@ -34,9 +34,9 @@ async function deploy() {
       await rest.put(Routes.applicationGuildCommands(config.clientId, config.mainGuildId), {
         body: guildOnlyCommands.map((c) => c.data.toJSON()),
       });
-      console.log(`✅ ${guildOnlyCommands.length} commande(s) réservée(s) au serveur principal déployée(s) (listen-messages, servers).`);
+      console.log(`✅ ${guildOnlyCommands.length} commande(s) réservée(s) au serveur principal déployée(s) (listen-inscriptions, servers).`);
     } else {
-      console.warn('⚠️ MAIN_GUILD_ID non défini : /listen-messages et /servers seront visibles sur tous les serveurs. Définissez MAIN_GUILD_ID dans .env pour les limiter au serveur principal.');
+      console.warn('⚠️ MAIN_GUILD_ID non défini : /listen-inscriptions et /servers seront visibles sur tous les serveurs. Définissez MAIN_GUILD_ID dans .env pour les limiter au serveur principal.');
       const commands = allCommands.map((c) => c.data.toJSON());
       const route = config.guildId
         ? Routes.applicationGuildCommands(config.clientId, config.guildId)

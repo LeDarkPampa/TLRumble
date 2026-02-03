@@ -21,7 +21,7 @@ C’est le serveur dont l’ID est **MAIN_GUILD_ID**. C’est là que sont cré�
 | **/signup** | Wargame Player ou Admin | S’inscrire avec 6 joueurs (ID créneau + 6 mentions) |
 | **/schedule-setup** | Moderator ou Admin | Définir le canal où le bot poste les créneaux (embed + boutons) |
 | **/tl-feed-setup** | — | **Indisponible** sur le serveur principal (message pour utiliser le canal schedule) |
-| **/listen-messages** | ManageGuild ; Moderator pour enable/disable sur d’autres serveurs | Activer/désactiver l’enregistrement des messages (historique) |
+| **/listen-inscriptions** | ManageGuild ; Moderator pour enable/disable sur d’autres serveurs | Activer/désactiver l’enregistrement des messages (historique) |
 | **/servers** | Moderator ou Admin | Liste des serveurs où le bot est présent + salons |
 
 ### Ce qui se passe sur le serveur principal
@@ -49,7 +49,7 @@ Ce sont les autres serveurs où le bot est invité. Ils reçoivent les **annonce
 | **/slot create** | — | **Indisponible** (message pour créer sur TL Rumble) |
 | **/slot delete** | — | **Indisponible** (réservé au serveur principal) |
 | **/signup** | — | **Indisponible** en commande ; utiliser le **bouton** sous l’annonce (voir ci‑dessous) |
-| **/listen-messages** | — | **Invisible** (commande enregistrée uniquement sur le serveur principal) |
+| **/listen-inscriptions** | — | **Invisible** (commande enregistrée uniquement sur le serveur principal) |
 | **/servers** | — | **Invisible** (commande enregistrée uniquement sur le serveur principal) |
 
 ### Ce qui se passe sur le serveur fils
@@ -79,7 +79,7 @@ Ce sont les autres serveurs où le bot est invité. Ils reçoivent les **annonce
 | Voir les inscrits (bouton) | ✅ | ✅ |
 | Définir le canal des créneaux (schedule) | ✅ `/schedule-setup` (Moderator) | ❌ |
 | Définir le canal des annonces (feed) | ❌ | ✅ `/schedule-setup` ou `/tl-feed-setup` |
-| Écoute des messages / liste des serveurs | ✅ `/listen-messages`, `/servers` (Moderator) | ❌ (commandes invisibles) |
+| Écoute des inscriptions / liste des serveurs | ✅ `/listen-inscriptions`, `/servers` (Moderator) | ❌ (commandes invisibles) |
 
 ---
 

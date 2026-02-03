@@ -14,7 +14,7 @@ Plan étape par étape pour finaliser le bot TL Rumble (créneaux + inscriptions
 - [x] Thread sous chaque message de wargame
 - [x] Mise à jour de l’embed après chaque inscription (compteur + liste des groupes)
 - [x] Rappel 10 min avant l’heure du wargame (dans le thread)
-- [x] Multi-guildes : feed, `/slot list`, `/tl-feed-setup`, `/listen-messages`
+- [x] Multi-guildes : feed, `/slot list`, `/tl-feed-setup`, `/listen-inscriptions`
 - [x] Docker + déploiement NAS (`Dockerfile`, `docker-compose.yml`, `docs/DEPLOIEMENT_NAS.md`)
 
 **Manquant pour « complètement fonctionnel » :** inscription par bouton (modal), voir les inscrits, fermeture de slot, doc/config pour les admins, robustesse (arrêt propre, optionnel health check).

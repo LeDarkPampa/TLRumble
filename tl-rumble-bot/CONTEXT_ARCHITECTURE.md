@@ -32,14 +32,14 @@ tl-rumble-bot/
 ├── src/
 │   ├── index.js                 # Point d'entrée : config, db, load commands/events, login
 │   ├── config.js                # Lecture .env (token, clientId, rôles, timezone, db path, mainGuildId)
-│   ├── deploy-commands.js       # Enregistrement slash commands (global + guild pour listen-messages, servers)
+│   ├── deploy-commands.js       # Enregistrement slash commands (global + guild pour listen-inscriptions, servers)
 │   ├── commands/
 │   │   ├── ping.js              # /ping
 │   │   ├── slot.js              # /slot create | list | info | close | delete
 │   │   ├── signup.js            # /signup (slot + 6 joueurs)
 │   │   ├── tl-feed-setup.js     # /tl-feed-setup (canal) — serveurs autres que principal
 │   │   ├── schedule-setup.js    # /schedule-setup (canal) — principal = schedule ; autres = feed
-│   │   ├── listen-messages.js   # /listen-messages (enable/disable/status, enable-for-server, disable-for-server)
+│   │   ├── listen-inscriptions.js   # /listen-inscriptions (enable-for-server, disable-for-server avec ID)
 │   │   └── servers.js           # /servers — liste des serveurs + salons (Moderator, principal uniquement)
 │   ├── services/
 │   │   ├── slotService.js       # createSlot, listSlots, getSlotById, deleteSlot, getRegistrationsForSlot, etc.
@@ -57,7 +57,7 @@ tl-rumble-bot/
 │   │   └── eventHandler.js     # Charge tous les events depuis events/
 │   └── events/
 │       ├── ready.js             # Rappels 10 min avant wargame + postTeamsForSlot (getScheduleChannelId)
-│       ├── interactionCreate.js # Boutons signup/view_slot, modal signup, commandes slash + garde main-guild pour servers/listen-messages
+│       ├── interactionCreate.js # Boutons signup/view_slot, modal signup, commandes slash + garde main-guild pour servers/listen-inscriptions
 │       └── messageCreate.js     # Enregistrement messages (message_log) si écoute activée
 ├── docker-compose.yml           # Volume app-data:/app/data, env_file .env
 ├── Dockerfile                   # node:20-bookworm-slim, entrypoint : DATABASE_PATH=/app/data/tl-rumble.sqlite
@@ -83,11 +83,11 @@ tl-rumble-bot/
 | `/signup` | Partout | Serveur principal si `MAIN_GUILD_ID` | Wargame Player, un des 6 joueurs |
 | `/tl-feed-setup` | Partout | Serveurs **autres que** principal | Gérer le serveur — canal des annonces |
 | `/schedule-setup` | Partout | Principal = canal schedule ; autres = canal feed | Principal : Moderator ; autres : Gérer le serveur |
-| `/listen-messages` | **Serveur principal uniquement** (guild) | Principal | ManageGuild ; enable-for-server/disable-for-server = Moderator |
+| `/listen-inscriptions` | **Serveur principal uniquement** (guild) | Principal | ManageGuild ; enable-for-server/disable-for-server = Moderator |
 | `/servers` | **Serveur principal uniquement** (guild) | Principal | Moderator/Admin — liste des guildes + salons |
 
-- **Déploiement des commandes :** si `MAIN_GUILD_ID` est défini, les commandes **listen-messages** et **servers** sont enregistrées uniquement sur ce serveur (guild) ; les autres sont en globales.  
-- **Garde dans `interactionCreate` :** si quelqu’un appelle `/servers` ou `/listen-messages` hors du serveur principal, le bot répond que la commande n’est disponible que sur TL Rumble.
+- **Déploiement des commandes :** si `MAIN_GUILD_ID` est défini, les commandes **listen-inscriptions** et **servers** sont enregistrées uniquement sur ce serveur (guild) ; les autres sont en globales.  
+- **Garde dans `interactionCreate` :** si quelqu’un appelle `/servers` ou `/listen-inscriptions` hors du serveur principal, le bot répond que la commande n’est disponible que sur TL Rumble.
 
 ---
 
@@ -110,13 +110,13 @@ tl-rumble-bot/
 |----------|-------------|-------------|
 | BOT_TOKEN | Oui | Token du bot Discord |
 | CLIENT_ID | Oui | Application ID |
-| MODERATOR_ROLE_ID | Oui | Rôle pour créer slots, delete, listen-messages, servers |
+| MODERATOR_ROLE_ID | Oui | Rôle pour créer slots, delete, listen-inscriptions, servers |
 | WARGAME_PLAYER_ROLE_ID | Oui | Rôle pour s’inscrire |
 | GUILD_ID | Non | Déploiement des commandes en guild (dev) |
 | SERVER_TIMEZONE | Non | Défaut Europe/Paris |
 | DATABASE_PATH | Non | Défaut ./data/tl-rumble.sqlite ; en Docker NAS souvent /app/data/tl-rumble.sqlite |
 | WARGAME_SCHEDULE_CHANNEL_ID | Non | Canal schedule (fallback si pas de ligne en base dans guild_schedule_channels) |
-| MAIN_GUILD_ID | Non | ID du serveur principal ; si défini : create/signup/schedule-setup (schedule) et listen-messages/servers limités à ce serveur ; feed sur les autres |
+| MAIN_GUILD_ID | Non | ID du serveur principal ; si défini : create/signup/schedule-setup (schedule) et listen-inscriptions/servers limités à ce serveur ; feed sur les autres |
 
 ---
 

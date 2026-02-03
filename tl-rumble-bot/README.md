@@ -65,7 +65,7 @@ npm start
 | `/signup` | Inscrit un groupe de 6 joueurs sur un créneau (choix du créneau dans la liste ou ID + 6 mentions) | Wargame Player, **serveur principal uniquement** si `MAIN_GUILD_ID` est défini |
 | `/tl-feed-setup` | Configure le canal des annonces des nouveaux créneaux (pour ce serveur) | Gérer le serveur, **serveurs autres que TL Rumble** si `MAIN_GUILD_ID` est défini |
 | `/schedule-setup` | Principal : canal des créneaux + inscription. Autres serveurs : canal des annonces | Principal : Moderator ; autres : Gérer le serveur |
-| `/listen-messages` | Activer / désactiver l’enregistrement des messages écrits de ce serveur (historique en base) | **Serveur principal uniquement** — Admin / Gérer le serveur ; Moderator pour enable-for-server/disable-for-server |
+| `/listen-inscriptions` | Activer / désactiver l’enregistrement des messages (inscriptions) par serveur (historique en base) | **Serveur principal uniquement** — Admin / Gérer le serveur ; Moderator pour enable-for-server/disable-for-server |
 | `/servers` | Lister les serveurs où le bot est présent et leurs salons (dont vocaux + qui est connecté) | Moderator, **serveur principal uniquement** |
 
 ## Inviter le bot sur d’autres serveurs (lien OAuth2)
@@ -85,7 +85,7 @@ Pour que d’autres guildes (serveurs) puissent utiliser le bot (ex. `/slot list
 
 Avec ces 3 permissions, le bot fonctionne sur **tous** les serveurs (principal et miroirs). Sur le serveur principal, si tu veux que le **message schedule soit mis à jour** à chaque inscription, ajoute **après coup** au rôle du bot : **Read Message History**. Si tu veux les **threads** sous les messages schedule, ajoute aussi : **Create Public Threads** et **Send Messages in Threads**. Sans ces droits, le bot poste les messages et envoie les rappels dans le canal ; le message schedule ne sera pas mis à jour après inscription (sans Read Message History).
 
-**Écoute des messages (`/listen-messages`) :** pour que le bot puisse enregistrer le contenu des messages écrits (historique), il faut activer l’intent privilégié **Message Content** dans le [Discord Developer Portal](https://discord.com/developers/applications) → ton application → **Bot** → **Privileged Gateway Intents** → cocher **Message Content Intent**. Sans cet intent, les messages ne seront pas stockés (le bot ne reçoit pas le texte).
+**Écoute des inscriptions (`/listen-inscriptions`) :** pour que le bot puisse enregistrer le contenu des messages écrits (historique), il faut activer l’intent privilégié **Message Content** dans le [Discord Developer Portal](https://discord.com/developers/applications) → ton application → **Bot** → **Privileged Gateway Intents** → cocher **Message Content Intent**. Sans cet intent, les messages ne seront pas stockés (le bot ne reçoit pas le texte).
 
 ### Permissions : serveur principal vs autres serveurs
 
@@ -150,7 +150,7 @@ src/
 │   ├── signup.js
 │   ├── tl-feed-setup.js  # canal des annonces (serveurs autres que principal)
 │   ├── schedule-setup.js # canal schedule (principal) ou feed (autres serveurs)
-│   ├── listen-messages.js
+│   ├── listen-inscriptions.js
 │   └── servers.js
 ├── services/
 │   ├── slotService.js

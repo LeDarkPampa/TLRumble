@@ -8,6 +8,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "deploy-commands": "node src/deploy-commands.js",
+    "message-log-stats": "node scripts/message-log-stats.js",
+    "message-log-export": "node scripts/message-log-stats.js --csv",
     "lint": "eslint src/**/*.js",
     "format": "prettier --write \"src/**/*.js\""
   },

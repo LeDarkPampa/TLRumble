@@ -17,7 +17,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildMessages, // Pour écouter les messages (listen-messages)
+    GatewayIntentBits.GuildMessages, // Pour écouter les messages (listen-inscriptions)
     GatewayIntentBits.MessageContent, // Intent privilégié : contenu des messages (à activer dans le portail Discord)
   ],
 });

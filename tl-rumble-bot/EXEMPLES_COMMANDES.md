@@ -198,35 +198,32 @@ Les salons sont regroupés par catégorie. Si la liste dépasse la limite Discor
 
 ---
 
-## 7. `/listen-messages`
+## 7. `/listen-inscriptions`
 
 **Qui :** utilisateurs avec la permission **Gérer le serveur** (ou Administrateur)  
 **Où :** sur **n’importe quel serveur** **uniquement sur le serveur principal TL Rumble**. La commande n'est pas accessible sur les autres serveurs (message d'erreur si utilisée ailleurs).  
 **But :** choisir si le bot enregistre ou non les messages écrits de ce serveur dans une table (historique local). Par défaut l’écoute est désactivée ; un admin peut l’activer avec `enable` ou la désactiver avec `disable`.
 
 **Sous-commandes :**
-| Sous-commande | Description | Qui |
-|---------------|-------------|-----|
-| `enable`  | Active l’écoute : les messages écrits (hors bots) seront enregistrés dans la base (table `message_log`). |
-| `disable` | Désactive l’écoute : les nouveaux messages ne seront plus enregistrés. |
+| Sous-commande | Description |
+|---------------|-------------|
+| `enable-for-server`  | Active l’écoute : les messages écrits (hors bots) seront enregistrés dans la base (option `server_id` requise). |
+| `disable-for-server` | Désactive l’écoute : les nouveaux messages ne seront plus enregistrés. |
 | `status`  | Affiche si l’écoute est activée ou non sur ce serveur. |
 
 **Exemples :**
 ```
-/listen-messages enable
-/listen-messages disable
-/listen-messages status
-/listen-messages enable-for-server  server_id: 1234567890123456789
-/listen-messages disable-for-server  server_id: 1234567890123456789
+/listen-inscriptions enable-for-server  server_id: 1234567890123456789
+/listen-inscriptions disable-for-server  server_id: 1234567890123456789
 ```
-Pour **activer ou désactiver l'écoute sur un autre serveur** depuis le serveur principal : utilise `enable-for-server` ou `disable-for-server` avec l'option `server_id` (réservé aux Moderators sur le serveur principal). Pour obtenir l'ID d'un serveur secondaire : lance **`/servers`** sur le serveur principal ; l'ID est en bas de chaque embed (footer « ID: … »).
+Pour obtenir l'ID d'un serveur : lance **`/servers`** sur le serveur principal ; l'ID est en bas de chaque embed (footer « ID: … »).
 
 **Réponse du bot :** message éphémère confirmant l’état ou le changement.
 
 **Note technique :** l’enregistrement nécessite l’intent privilégié **Message Content** (à activer dans le Discord Developer Portal → Bot → Privileged Gateway Intents). Les messages sont stockés en base (guild_id, canal, auteur, contenu tronqué à 2000 caractères, message_id, date).
 
 **Erreurs possibles :**
-- Sur un autre serveur → *"La commande /listen-messages n'est disponible que sur le serveur principal TL Rumble."*
+- Sur un autre serveur → *"La commande /listen-inscriptions n'est disponible que sur le serveur principal TL Rumble."*
 - Pas la permission Gérer le serveur → la commande n’apparaît pas ou Discord affiche une erreur de permission.
 
 ---
