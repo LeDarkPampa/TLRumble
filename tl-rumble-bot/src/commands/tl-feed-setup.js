@@ -12,7 +12,7 @@ export default {
     .addChannelOption((o) =>
       o
         .setName('canal')
-        .setDescription('Canal où le bot affichera les nouveaux wargames (choisir à nouveau le même canal pour vérifier la config)')
+        .setDescription('Canal où le bot publiera les nouveaux wargames (même canal pour revérifier la config)')
         .setRequired(true)
         .addChannelTypes(ChannelType.GuildText)
     ),
