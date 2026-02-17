@@ -9,10 +9,10 @@
 import path from 'path';
 import { EmbedBuilder } from 'discord.js';
 import { config, validateConfig } from './src/config.js';
-import { createClient, getMembersWithRole, sendRecapEmbeds, sendRelanceDms } from './src/discord.js';
+import { createClient, getMembersWithRole, getMemberIdsHavingRole, sendRecapEmbeds, sendRelanceDms } from './src/discord.js';
 import { appendRelanceErrors, getUniqueMpRefuses } from './src/relanceLogger.js';
 import { getEventsForWeekWithSignups } from './src/raidHelper.js';
-import { buildRecapEmbeds, getMembersBelowResponseThreshold } from './src/recap.js';
+import { buildRecapEmbeds, getMembersBelowResponseThreshold, getMembersAtExpulsionRisk, getMembersEligibleForReward } from './src/recap.js';
 
 const RECAP_HOUR = 23;
 const CHECK_INTERVAL_MS = 60 * 1000;
@@ -112,6 +112,134 @@ async function handleRecapCommand(interaction, client) {
       });
     } catch (err) {
       console.error('[recap] Erreur commande /recap:', err.message);
+      await interaction.editReply({
+        content: `Erreur : ${err.message}`,
+        embeds: [],
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  if (interaction.commandName === 'eligibles-recompense') {
+    try {
+      await interaction.deferReply({ ephemeral: true });
+      const [members, events] = await Promise.all([
+        getMembersWithRole(client),
+        getEventsForWeekWithSignups(),
+      ]);
+      const eligible = getMembersEligibleForReward(members, events, {
+        responseThresholdPercent: config.reward.responseThresholdPercent,
+        minParticipations: config.reward.minParticipations,
+      });
+
+      const weekLabel = getWeekLabel();
+      const description =
+        eligible.length === 0
+          ? `Aucun membre ne remplit les deux critères cette semaine (réponse ≥ ${config.reward.responseThresholdPercent} % **et** au moins ${config.reward.minParticipations} présences sur les événements Raid-Helper).`
+          : `**${eligible.length}** membre(s) éligible(s) : réponse ≥ ${config.reward.responseThresholdPercent} % **et** au moins ${config.reward.minParticipations} présences sur les événements de la semaine.`;
+
+      const embed = new EmbedBuilder()
+        .setTitle(`Éligibles récompense — ${weekLabel}`)
+        .setDescription(description)
+        .setColor(eligible.length > 0 ? 0x57f287 : 0x99aab5)
+        .setTimestamp();
+
+      if (eligible.length > 0) {
+        const valueMax = 1024;
+        const lines = eligible.map(
+          (m) => `• **${m.displayName}** (\`${m.id}\`) — ${m.responsePercent} % réponse, ${m.presenceCount} présence(s)`
+        );
+        let chunk = '';
+        const parts = [];
+        for (const line of lines) {
+          if (chunk.length + line.length + 1 > valueMax && chunk) {
+            parts.push(chunk.trim());
+            chunk = '';
+          }
+          chunk += line + '\n';
+        }
+        if (chunk) parts.push(chunk.trim());
+        parts.forEach((p, i) => {
+          embed.addFields({
+            name: i === 0 ? 'Membres éligibles' : '… (suite)',
+            value: p || '—',
+            inline: false,
+          });
+        });
+      }
+      await interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error('[recap] Erreur commande /eligibles-recompense:', err.message);
+      await interaction.editReply({
+        content: `Erreur : ${err.message}`,
+        embeds: [],
+      }).catch(() => {});
+    }
+    return;
+  }
+
+  if (interaction.commandName === 'risque-expulsion') {
+    try {
+      await interaction.deferReply({ ephemeral: true });
+      const [members, events] = await Promise.all([
+        getMembersWithRole(client),
+        getEventsForWeekWithSignups(),
+      ]);
+      const absentIds = new Set(config.expulsion.absentUserIds.map((id) => String(id).trim()));
+      let specializedIds = new Set();
+      if (config.expulsion.specializedActivityRoleId && config.discord.guildId) {
+        specializedIds = await getMemberIdsHavingRole(
+          client,
+          config.discord.guildId,
+          config.expulsion.specializedActivityRoleId
+        );
+      }
+      const atRisk = getMembersAtExpulsionRisk(members, events, {
+        responseThresholdPercent: config.expulsion.responseThresholdPercent,
+        minParticipations: config.expulsion.minParticipations,
+        absentUserIds: absentIds,
+        specializedActivityUserIds: specializedIds,
+      });
+
+      const weekLabel = getWeekLabel();
+      const description =
+        atRisk.length === 0
+          ? `Aucun membre ne remplit actuellement les critères d'exclusion (réponse < ${config.expulsion.responseThresholdPercent} % ou participations < ${config.expulsion.minParticipations}). Les personnes ayant déclaré leur absence sont exclues de cette liste.`
+          : `**${atRisk.length}** membre(s) remplissent au moins un critère d'exclusion (réponse < ${config.expulsion.responseThresholdPercent} % **ou** participations < ${config.expulsion.minParticipations} cette semaine). Les absences déclarées sont exclues.`;
+
+      const embed = new EmbedBuilder()
+        .setTitle(`Risque d'expulsion — ${weekLabel}`)
+        .setDescription(description)
+        .setColor(atRisk.length > 0 ? 0xed4245 : 0x57f287)
+        .setTimestamp();
+
+      if (atRisk.length > 0) {
+        const valueMax = 1024;
+        const lines = atRisk.map(
+          (m) =>
+            `• **${m.displayName}** (\`${m.id}\`) — ${m.responsePercent} % réponse, ${m.presenceCount} participation(s) — ${m.reasons.join(' ; ')}`
+        );
+        let chunk = '';
+        const parts = [];
+        for (const line of lines) {
+          if (chunk.length + line.length + 1 > valueMax && chunk) {
+            parts.push(chunk.trim());
+            chunk = '';
+          }
+          chunk += line + '\n';
+        }
+        if (chunk) parts.push(chunk.trim());
+        parts.forEach((p, i) => {
+          embed.addFields({
+            name: i === 0 ? 'Membres concernés' : '… (suite)',
+            value: p || '—',
+            inline: false,
+          });
+        });
+      }
+      await interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error('[recap] Erreur commande /risque-expulsion:', err.message);
       await interaction.editReply({
         content: `Erreur : ${err.message}`,
         embeds: [],

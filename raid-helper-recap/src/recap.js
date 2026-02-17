@@ -214,6 +214,98 @@ export function getMembersBelowResponseThreshold(members, events, thresholdPerce
   return below;
 }
 
+/**
+ * Retourne les membres à risque d'expulsion selon les critères de la guilde :
+ * - Moins de 20 % de réponse aux raid-helper OU
+ * - Moins de 2 participations (présences) dans la semaine aux activités
+ * Les personnes déclarant leur absence (absentUserIds) sont exclues.
+ * Les joueurs "spécialisés activité" (specializedActivityUserIds) ne sont pas sanctionnés sur le critère participations.
+ * @param {Array<{ id: string, displayName: string }>} members
+ * @param {Array<{ id: string, startTime: number, signups?: Array<Record<string, unknown>> }>} events
+ * @param {{
+ *   responseThresholdPercent?: number,
+ *   minParticipations?: number,
+ *   absentUserIds?: Set<string>,
+ *   specializedActivityUserIds?: Set<string>
+ * }} options
+ * @returns {Array<{ id: string, displayName: string, responsePercent: number, presenceCount: number, reasons: string[] }>}
+ */
+export function getMembersAtExpulsionRisk(members, events, options = {}) {
+  const responseThresholdPercent = options.responseThresholdPercent ?? 20;
+  const minParticipations = options.minParticipations ?? 2;
+  const absentUserIds = options.absentUserIds ?? new Set();
+  const specializedActivityUserIds = options.specializedActivityUserIds ?? new Set();
+
+  const now = new Date();
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const endOfTodayTs = Math.floor(endOfToday.getTime() / 1000);
+  const { byMember, totalEvents } = computeStats(members, events, endOfTodayTs);
+  if (totalEvents === 0) return [];
+
+  const atRisk = [];
+  for (const row of byMember) {
+    const id = String(row.id).trim();
+    if (absentUserIds.has(id)) continue;
+
+    const responsePercent = Math.round((row.responseCount / totalEvents) * 100);
+    const isSpecialized = specializedActivityUserIds.has(id);
+    const responseOk = responsePercent >= responseThresholdPercent;
+    const participationOk = row.presenceCount >= minParticipations || isSpecialized;
+
+    if (responseOk && participationOk) continue;
+
+    const reasons = [];
+    if (!responseOk) reasons.push(`réponse < ${responseThresholdPercent} %`);
+    if (!participationOk && !isSpecialized) reasons.push(`participations < ${minParticipations}`);
+
+    atRisk.push({
+      id: row.id,
+      displayName: row.displayName,
+      responsePercent,
+      presenceCount: row.presenceCount,
+      reasons,
+    });
+  }
+  return atRisk;
+}
+
+/**
+ * Retourne les membres éligibles à la récompense selon les critères :
+ * - Au moins 50 % de réponses aux raid-helper de la semaine ;
+ * - Présence sur au moins 5 événements de la semaine (inscrit présent : tank/dps/healer).
+ * Les deux critères doivent être remplis.
+ * @param {Array<{ id: string, displayName: string }>} members
+ * @param {Array<{ id: string, startTime: number, signups?: Array<Record<string, unknown>> }>} events
+ * @param {{ responseThresholdPercent?: number, minParticipations?: number }} options
+ * @returns {Array<{ id: string, displayName: string, responsePercent: number, presenceCount: number }>}
+ */
+export function getMembersEligibleForReward(members, events, options = {}) {
+  const responseThresholdPercent = options.responseThresholdPercent ?? 50;
+  const minParticipations = options.minParticipations ?? 5;
+
+  const now = new Date();
+  const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const endOfTodayTs = Math.floor(endOfToday.getTime() / 1000);
+  const { byMember, totalEvents } = computeStats(members, events, endOfTodayTs);
+  if (totalEvents === 0) return [];
+
+  const eligible = [];
+  for (const row of byMember) {
+    const responsePercent = Math.round((row.responseCount / totalEvents) * 100);
+    const responseOk = responsePercent >= responseThresholdPercent;
+    const participationOk = row.presenceCount >= minParticipations;
+    if (responseOk && participationOk) {
+      eligible.push({
+        id: row.id,
+        displayName: row.displayName,
+        responsePercent,
+        presenceCount: row.presenceCount,
+      });
+    }
+  }
+  return eligible;
+}
+
 function addTierFieldsToEmbed(embed, green, yellow, orange, red) {
   const addField = (name, list) => {
     const chunks = chunkNames(list);

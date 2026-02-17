@@ -54,6 +54,29 @@ export async function getMembersWithRole(client) {
 }
 
 /**
+ * Retourne les IDs Discord des membres qui ont le rôle donné (ex. rôle "spécialisé activité" pour exclusion critère participations).
+ * @param {Client} client - Client Discord connecté
+ * @param {string} guildId - ID du serveur
+ * @param {string} roleId - ID du rôle
+ * @returns {Promise<Set<string>>}
+ */
+export async function getMemberIdsHavingRole(client, guildId, roleId) {
+  if (!roleId || !guildId) return new Set();
+  const guild = await client.guilds.fetch(guildId);
+  if (!guild) return new Set();
+  try {
+    await guild.members.fetch({ force: true });
+  } catch {
+    return new Set();
+  }
+  const ids = new Set();
+  guild.members.cache.forEach((m) => {
+    if (!m.user.bot && m.roles.cache.has(roleId)) ids.add(m.user.id);
+  });
+  return ids;
+}
+
+/**
  * Envoie les deux embeds récap (taux de réponse + taux de présence) sur Discord.
  * Deux messages distincts : (1) taux de réponse, (2) taux de présence.
  * Utilise le webhook si DISCORD_WEBHOOK_URL est défini, sinon le canal si DISCORD_CHANNEL_ID + client.

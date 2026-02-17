@@ -22,6 +22,14 @@ const commands = [
     description: 'Générer le récap Raid-Helper (taux de réponse + présence) sur demande',
   },
   {
+    name: 'risque-expulsion',
+    description: 'Lister les membres à risque d\'expulsion (réponse < 20 % ou participations < 2, absences exclues)',
+  },
+  {
+    name: 'eligibles-recompense',
+    description: 'Lister les membres éligibles à la récompense (≥ 50 % réponse et ≥ 5 présences sur les événements de la semaine)',
+  },
+  {
     name: 'mp-refuses',
     description: 'Lister les utilisateurs n\'ayant pas pu recevoir le MP de relance (MP désactivés)',
   },
@@ -31,7 +39,7 @@ try {
   await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
     body: commands,
   });
-  console.log('Commandes /recap et /mp-refuses enregistrées sur le serveur (guild)', guildId);
+  console.log('Commandes /recap, /risque-expulsion, /eligibles-recompense et /mp-refuses enregistrées sur le serveur (guild)', guildId);
 } catch (e) {
   console.error('Erreur enregistrement commandes:', e.message);
   process.exit(1);

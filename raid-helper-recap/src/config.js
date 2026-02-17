@@ -45,6 +45,20 @@ export const config = {
     /** Fichier où sont enregistrés les utilisateurs n'ayant pas pu recevoir le MP (MP désactivés, etc.). Chemin relatif à la racine du projet. */
     errorsFile: process.env.RELANCE_MP_ERRORS_FILE || 'data/relance-mp-errors.json',
   },
+  /** Critères risque d'expulsion (commande /risque-expulsion) : réponse < 20 % OU participations < 2 (sauf joueurs spécialisés). Absents = même liste que relance. */
+  expulsion: {
+    responseThresholdPercent: parseInt(process.env.EXPULSION_RESPONSE_THRESHOLD || '20', 10) || 20,
+    minParticipations: parseInt(process.env.EXPULSION_MIN_PARTICIPATIONS || '2', 10) || 2,
+    /** IDs Discord des personnes ayant déclaré leur absence : exclus de la liste risque (réutilise la liste relance). */
+    absentUserIds: parseAbsentUserIds(process.env.RELANCE_MP_ABSENT_IDS || ''),
+    /** Rôle Discord dont les membres sont exemptés du critère "participations < 2" (joueurs spécialisés activité). Optionnel. */
+    specializedActivityRoleId: String(process.env.EXPULSION_EXCEPT_SPECIALIZED_ROLE_ID || '').trim(),
+  },
+  /** Critères éligibilité récompense (/eligibles-recompense) : réponse ≥ 50 % ET présences ≥ 5 sur les événements Raid-Helper de la semaine. */
+  reward: {
+    responseThresholdPercent: parseInt(process.env.REWARD_RESPONSE_THRESHOLD || '50', 10) || 50,
+    minParticipations: parseInt(process.env.REWARD_MIN_PARTICIPATIONS || '5', 10) || 5,
+  },
 };
 
 function parseAbsentUserIds(raw) {
